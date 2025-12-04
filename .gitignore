@@ -1,0 +1,37 @@
+# logs
+
+logs/
+
+# temp files
+*.tmp
+*.log
+temp/
+gen/
+
+# build outputs
+dist/
+build/
+out/
+# node modules
+node_modules/
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# env
+.env
+.env.local
+.env.*.local
+# coverage
+coverage/
+
+# debug
+debug/
+
+# go specific
+*.exe
+*.dll
+*.so
+*.dylib
+vendor/
+
