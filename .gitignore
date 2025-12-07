@@ -10,7 +10,6 @@ gen/
 
 # build outputs
 dist/
-build/
 out/
 # node modules
 node_modules/
@@ -34,4 +33,9 @@ debug/
 *.so
 *.dylib
 vendor/
+
+# windows specific
+*.bat
+*.cmd
+*.ps1
 

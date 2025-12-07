@@ -1,40 +1,5 @@
 # IREX – Copilot Instructions
 
-These are high-level guidelines for GitHub Copilot when working in the IREX project.  
-The IREX framework is an IR-based backend code generator that currently targets:
-- Fastify (primary backend framework)
-- Express (secondary)
-- Mongoose (MongoDB)
-- Knex (SQL databases)
-- TypeScript (preferred)
-- JavaScript (allowed)
-
-Future runtimes like Go, Rust, C++, PHP, etc. will come later, but Copilot should not suggest them yet.
-
----
-
-# 1. Project Architecture
-IREX follows an IR (Intermediate Representation) → Template → Output pipeline.
-
-Key folders:
-- `templates/` → Template files (e.g., controller.ts.tpl)
-- `internal/*` → IR builder, parser, generator, renderer
-- `cmd/irex/` → CLI commands
-- `examples/` → Generated example applications
-
-Copilot should help maintain:
-- Consistent template structure
-- Clean IR → render logic
-- Modular generators for Fastify/Express and Mongoose/Knex
-- TypeScript-first approach
-
----
-
-# 2. Template File Rules
-Template files use extensions like:
-- `.ts.tpl`
-# IREX – Copilot Instructions
-
 These are high-level guidelines for GitHub Copilot when working in the IREX project. The IREX framework is an IR-based backend code generator that currently targets:
 
 - Fastify (primary backend framework)
@@ -53,11 +18,11 @@ Future runtimes like Go, Rust, C++, PHP, etc. will come later, but Copilot shoul
 IREX follows an IR (Intermediate Representation) → Template → Output pipeline.
 
 Key folders:
-
-- `templates/` — template files (e.g., `controller.ts.tpl`)
-- `internal/*` — IR builder, parser, generator, renderer
-- `cmd/irex/` — CLI commands
-- `examples/` — generated example applications
+- `internal/*` → IR builder, parser, generator, renderer, cli etc.
+- `cmd/irex/` → Build CLI commands - these commands will be used by end users
+- `cmd/irex-dev/` → Development commands - used during IREX generator development
+- `docs/` → Documentation
+- `gen/` → Generated example applications
 
 Copilot should help maintain consistent template structure, clean IR→render logic, modular generators (Fastify/Express, Mongoose/Knex), and a TypeScript-first approach.
 
@@ -197,3 +162,22 @@ Prefer simplicity, minimalism, clean TypeScript, predictable IR formats and cons
 ---
 
 If you want, I can also generate additional repo helpers such as a Copilot contextual prompt, a Copilot Chat persona, a `CONTRIBUTING.md`, or a template linting ruleset — tell me which and I can add one.
+
+## 11. Run go commands
+
+### irex commands
+
+IREX user commands: These are used by end users of the IREX framework.
+```
+irex init # Initialize a new IREX project
+irex dev # Start development server with hot-reloading
+irex build # Build the IREX project
+```
+
+### irexd commands
+
+IREX development commands: These are used when developing IREX itself.
+
+```
+irexd init # Initialize IREX development environment
+irexd watch # Watch for changes (In project + go files) and rebuild IREX 
