@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	formatCmd "github.com/kwizyHQ/irex/internal/cli/common/format"
 	initcmd "github.com/kwizyHQ/irex/internal/cli/common/init"
 	"github.com/spf13/cobra"
 )
@@ -30,6 +31,7 @@ func main() {
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(watchCmd)
+	rootCmd.AddCommand(formatCmd.NewFormatCmd())
 
 	// Handle Ctrl+C (SIGINT) gracefully
 	sigs := make(chan os.Signal, 1)

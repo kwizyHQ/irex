@@ -105,12 +105,21 @@ func Run() *cobra.Command {
 			}, &name)
 
 			utils.AskFlagInput(utils.InputOption{
-				Message: "Target path (must not already exist)",
-				Help:    "Path to the target directory for your IREX project",
-				Default: "",
-				Type:    utils.InputString,
+				Message:  "Target path (must not already exist)",
+				Help:     "Path to the target directory for your IREX project",
+				Default:  "",
+				Type:     utils.InputString,
+				Required: true,
 			}, &target)
-			if _, err := os.Stat(target); err == nil {
+			if target == "." {
+				entries, err := os.ReadDir(target)
+				if err != nil {
+					return fmt.Errorf("failed to read current directory: %w", err)
+				}
+				if len(entries) > 0 {
+					return fmt.Errorf("current directory must be empty")
+				}
+			} else if _, err := os.Stat(target); err == nil {
 				return fmt.Errorf("target path %s already exists", target)
 			}
 
