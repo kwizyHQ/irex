@@ -1,0 +1,63 @@
+{
+  "name": "irex",
+  "displayName": "irex",
+  "description": "Irex tooling",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.106.1"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:specifications-hcl"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "irex.init",
+        "title": "Irex: Initialize Irex in Workspace"
+      },
+      {
+        "command": "irex.initNodeTs",
+        "title": "Irex: Initialize a node TypeScript project"
+      },
+      {
+        "command": "irex.watch",
+        "title": "Irex: Start development server (watch)"
+      }
+    ],
+    "languages": [
+      {
+        "id": "specifications-hcl",
+        "extensions": [
+          ".hcl"
+        ]
+      }
+    ],
+    "documentFormattingEditProviders": [
+      {
+        "language": "specifications-hcl"
+      }
+    ],
+    "documentRangeFormattingEditProviders": [
+      {
+        "language": "specifications-hcl"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.106.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "eslint": "^9.39.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
