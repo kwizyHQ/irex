@@ -1,6 +1,6 @@
 package config
 
-import "github.com/kwizyHQ/irex/internal/core/ir"
+import ast "github.com/kwizyHQ/irex/internal/core/ast"
 
 // ConfigDefinition is the root struct for the config HCL file, matching fastify-mongoose.hcl
 type ConfigDefinition struct {
@@ -56,8 +56,8 @@ type RuntimeSchemaBlock struct {
 }
 
 type RuntimeSchemaOptions struct {
-	URI ir.EnvRef `hcl:"uri,optional"`
-	DB  ir.EnvRef `hcl:"db,optional"`
+	URI ast.EnvRef `hcl:"uri,optional"`
+	DB  ast.EnvRef `hcl:"db,optional"`
 }
 
 type RuntimeServiceBlock struct {

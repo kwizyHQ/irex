@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/kwizyHQ/irex/internal/core/ir/config"
+	"github.com/kwizyHQ/irex/internal/core/ast/config"
 	"github.com/kwizyHQ/irex/internal/utils"
 )
 

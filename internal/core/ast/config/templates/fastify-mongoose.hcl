@@ -39,10 +39,10 @@ project {
 
     # Root directory containing IR specifications (.hcl files).
     # This directory MUST contain schema/ and service/ subfolders.
-    specifications = "./irs"
+    specifications = "./specs"
 
     # Directory containing generator templates (.tpl files)
-    templates      = "./irs/templates"
+    templates      = "./specs/templates"
 
     # Output directory where generated code will be written
     output         = "./src/generated"

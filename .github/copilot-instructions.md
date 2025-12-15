@@ -1,6 +1,6 @@
 # IREX – Copilot Instructions
 
-These are high-level guidelines for GitHub Copilot when working in the IREX project. The IREX framework is an IR-based backend code generator that currently targets:
+These are high-level guidelines for GitHub Copilot when working in the IREX project. The IREX framework is an AST-based backend code generator that currently targets:
 
 - Fastify (primary backend framework)
 - Express (secondary)
@@ -15,16 +15,16 @@ Future runtimes like Go, Rust, C++, PHP, etc. will come later, but Copilot shoul
 
 ## 1. Project architecture
 
-IREX follows an IR (Intermediate Representation) → Template → Output pipeline.
+IREX follows an AST (spec/DSL) → Template → Output pipeline.
 
 Key folders:
-- `internal/*` → IR builder, parser, generator, renderer, cli etc.
+- `internal/*` → AST (spec/DSL) builder, parser, generator, renderer, cli etc.
 - `cmd/irex/` → Build CLI commands - these commands will be used by end users
 - `cmd/irex-dev/` → Development commands - used during IREX generator development
 - `docs/` → Documentation
 - `gen/` → Generated example applications
 
-Copilot should help maintain consistent template structure, clean IR→render logic, modular generators (Fastify/Express, Mongoose/Knex), and a TypeScript-first approach.
+Copilot should help maintain consistent template structure, clean AST→render logic, modular generators (Fastify/Express, Mongoose/Knex), and a TypeScript-first approach.
 
 ---
 
@@ -101,16 +101,16 @@ Copilot should follow this pattern, keep CLI commands modular, and use Cobra-lik
 
 ---
 
-## 6. IR guidelines
+## 6. AST/spec guidelines
 
-IR is represented as structured Go data. Keep definitions strict, typed, minimalistic, JSON-friendly and extendable (workflows, models, services).
+AST/spec is represented as structured Go data. Keep definitions strict, typed, minimalistic, JSON-friendly and extendable (workflows, models, services).
 
 Example:
 
 ```go
-type IRModel struct {
+type ASTModel struct {
   Name   string
-  Fields []IRField
+  Fields []ASTField
 }
 ```
 
@@ -146,18 +146,18 @@ Do not mix template syntax incorrectly, add business logic inside generated file
 Help with:
 
 - Writing clean template files.
-- Mapping IR → template placeholders.
+- Mapping AST/spec → template placeholders.
 - Implementing CLI commands.
 - Structuring Fastify/Express modules.
 - Writing clean TypeScript/Javascript services.
-- Writing IR builders/parsers in Go.
+- Writing AST/spec builders/parsers in Go.
 - Documentation (`docs/*.md`).
 
 ---
 
 ## 10. If unsure
 
-Prefer simplicity, minimalism, clean TypeScript, predictable IR formats and consistent template structures.
+Prefer simplicity, minimalism, clean TypeScript, predictable AST/spec formats and consistent template structures.
 
 ---
 

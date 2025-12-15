@@ -1,4 +1,4 @@
-package ir
+package ast
 
 import (
 	"github.com/zclconf/go-cty/cty"
@@ -6,7 +6,7 @@ import (
 )
 
 // all functions map as "StringName": function
-var IRFunctions = map[string]function.Function{
+var ASTFunctions = map[string]function.Function{
 	"only":    OnlyFunc,
 	"except":  ExceptFunc,
 	"with":    WithFunc,
@@ -20,7 +20,7 @@ var IRFunctions = map[string]function.Function{
 var OnlyFunc = function.New(&function.Spec{
 	// VarParam allows an arbitrary number of string arguments
 	VarParam: &function.Parameter{Type: cty.String},
-	// Returns a dynamic object type (the IR structure)
+	// Returns a dynamic object type (the AST/spec structure)
 	Type: function.StaticReturnType(cty.DynamicPseudoType),
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 		// Prepare the list of strings to include
