@@ -9,39 +9,48 @@ type ServiceDefinition struct {
 
 // --- POLICIES ---
 type PoliciesBlock struct {
-	Defaults *PolicyDefaults `hcl:"defaults,block"`
-	Presets  []PolicyPreset  `hcl:"preset,block"`
-	Groups   []PolicyGroup   `hcl:"group,block"`
+	Mode         string         `hcl:"mode,optional"`
+	Precedence   string         `hcl:"precedence,optional"`
+	ShortCircuit *bool          `hcl:"short_circuit,optional"`
+	Presets      []PolicyPreset `hcl:"policy,block"`
+	Customs      []PolicyCustom `hcl:"custom,block"`
+	Groups       []PolicyGroup  `hcl:"group,block"`
 }
 
-type PolicyDefaults struct {
-	DenyRule any `hcl:"deny_rule,optional"`
-}
-
+// PolicyPreset represents a named policy (preset)
 type PolicyPreset struct {
 	Name        string `hcl:"name,label"`
+	Effect      string `hcl:"effect,optional"`
+	Scope       string `hcl:"scope,optional"`
+	Rule        string `hcl:"rule,optional"`
 	Description string `hcl:"description,optional"`
-	AllowRule   string `hcl:"allow_rule,optional"`
-	DenyRule    *bool  `hcl:"deny_rule,optional"`
+}
+
+// PolicyCustom represents a custom policy block
+type PolicyCustom struct {
+	Name        string `hcl:"name,label"`
+	Scope       string `hcl:"scope,optional"`
+	Description string `hcl:"description,optional"`
 }
 
 type PolicyGroup struct {
 	Name        string   `hcl:"name,label"`
+	Scope       string   `hcl:"scope,optional"`
 	Description string   `hcl:"description,optional"`
-	Any         []string `hcl:"any,optional"`
-	All         []string `hcl:"all,optional"`
+	Policies    []string `hcl:"policies,optional"`
 }
 
 // --- RATE LIMITS ---
 type RateLimitsBlock struct {
 	Defaults *RateLimitDefaults `hcl:"defaults,block"`
 	Presets  []RateLimitPreset  `hcl:"preset,block"`
+	Customs  []RateLimitCustom  `hcl:"custom,block"`
 }
 
 type RateLimitDefaults struct {
 	Action     string             `hcl:"action,optional"`
 	Type       string             `hcl:"type,optional"`
-	CountKey   string             `hcl:"count_key,optional"`
+	CountKey   []string           `hcl:"count_key,optional"`
 	Limit      string             `hcl:"limit,optional"`
 	BucketSize *int               `hcl:"bucket_size,optional"`
 	RefillRate string             `hcl:"refill_rate,optional"`
@@ -55,12 +64,18 @@ type RateLimitResponse struct {
 }
 
 type RateLimitPreset struct {
-	Name       string `hcl:"name,label"`
-	Limit      string `hcl:"limit,optional"`
-	Type       string `hcl:"type,optional"`
-	Expression string `hcl:"expression,optional"`
-	RefillRate string `hcl:"refill_rate,optional"`
-	BucketSize *int   `hcl:"bucket_size,optional"`
+	Name       string             `hcl:"name,label"`
+	Limit      string             `hcl:"limit,optional"`
+	Type       string             `hcl:"type,optional"`
+	CountKey   any                `hcl:"count_key,optional"`
+	RefillRate string             `hcl:"refill_rate,optional"`
+	BucketSize *int               `hcl:"bucket_size,optional"`
+	Burst      *int               `hcl:"burst,optional"`
+	Response   *RateLimitResponse `hcl:"response,block"`
+}
+
+type RateLimitCustom struct {
+	Name string `hcl:"name,label"`
 }
 
 // --- SERVICES ---
@@ -93,11 +108,12 @@ type ServiceDefaults struct {
 }
 
 type Operation struct {
-	Name        string `hcl:"name,label"`
-	Method      string `hcl:"method,optional"`
-	Path        string `hcl:"path,optional"`
-	Description string `hcl:"description,optional"`
-	Action      string `hcl:"action,optional"`
+	Name        string       `hcl:"name,label"`
+	Method      string       `hcl:"method,optional"`
+	Path        string       `hcl:"path,optional"`
+	Description string       `hcl:"description,optional"`
+	Action      string       `hcl:"action,optional"`
+	Apply       []ApplyBlock `hcl:"apply,block"`
 }
 
 type Service struct {
@@ -110,13 +126,22 @@ type Service struct {
 	Middlewares     []string          `hcl:"middlewares,optional"`
 	Policies        []string          `hcl:"policies,optional"`
 	RateLimit       *ServiceRateLimit `hcl:"rate_limit,block"`
+	Apply           []ApplyBlock      `hcl:"apply,block"`
 	Operations      []Operation       `hcl:"operation,block"`
 	Services        []Service         `hcl:"service,block"`
 }
 
 type ServiceRateLimit struct {
-	Limit          string `hcl:"limit,optional"`
-	Action         string `hcl:"action,optional"`
-	ActionDuration string `hcl:"action_duration,optional"`
-	CountKey       string `hcl:"count_key,optional"`
+	Limit          string   `hcl:"limit,optional"`
+	Action         string   `hcl:"action,optional"`
+	ActionDuration string   `hcl:"action_duration,optional"`
+	CountKey       []string `hcl:"count_key,optional"`
+}
+
+// ApplyBlock represents an apply block for policies or rate limits
+type ApplyBlock struct {
+	Type         string   `hcl:"type,label"` // "policy" or "rate_limit"
+	Name         string   `hcl:"name,label"`
+	ToOperations []string `hcl:"to_operations,optional"`
+	RateLimits   []string `hcl:"rate_limits,optional"`
 }
