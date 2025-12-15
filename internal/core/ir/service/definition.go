@@ -67,7 +67,7 @@ type RateLimitPreset struct {
 	Name       string             `hcl:"name,label"`
 	Limit      string             `hcl:"limit,optional"`
 	Type       string             `hcl:"type,optional"`
-	CountKey   any                `hcl:"count_key,optional"`
+	CountKey   []string           `hcl:"count_key,optional"`
 	RefillRate string             `hcl:"refill_rate,optional"`
 	BucketSize *int               `hcl:"bucket_size,optional"`
 	Burst      *int               `hcl:"burst,optional"`

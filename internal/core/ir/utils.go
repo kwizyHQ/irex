@@ -11,6 +11,7 @@ var IRFunctions = map[string]function.Function{
 	"except":  ExceptFunc,
 	"with":    WithFunc,
 	"without": WithoutFunc,
+	"env":     EnvFunc,
 }
 
 // --- Implementation of the `only` function (Similar to `with`) ---
@@ -95,6 +96,42 @@ var WithoutFunc = function.New(&function.Spec{
 			"exclude": cty.ListVal(excludeList),
 			// This typically implies starting with the default list and removing these
 			"mergeDefaults": cty.True,
+		}), nil
+	},
+})
+
+// EnvKind represents the kind of environment reference (env, var, secret)
+type EnvKind string
+
+const (
+	EnvKindEnv    EnvKind = "env"
+	EnvKindVar    EnvKind = "var"
+	EnvKindSecret EnvKind = "secret"
+)
+
+// EnvRef represents a reference to an environment variable, variable, or secret
+type EnvRef struct {
+	Name string  `hcl:"name,attr" cty:"name"`
+	Kind EnvKind `hcl:"kind,attr" cty:"kind"`
+}
+
+// EnvFunc is a function.Function wrapper for env(key)
+var EnvFunc = function.New(&function.Spec{
+	Params: []function.Parameter{
+		{
+			Name: "name",
+			Type: cty.String,
+		},
+	},
+	Type: function.StaticReturnType(cty.Object(map[string]cty.Type{
+		"name": cty.String,
+		"kind": cty.String,
+	})),
+	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
+		name := args[0].AsString()
+		return cty.ObjectVal(map[string]cty.Value{
+			"name": cty.StringVal(name),
+			"kind": cty.StringVal(string(EnvKindEnv)),
 		}), nil
 	},
 })
