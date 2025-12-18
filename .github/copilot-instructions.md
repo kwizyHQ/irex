@@ -1,183 +1,75 @@
-# IREX – Copilot Instructions
+# IREX – Copilot Instructions (2025)
 
-These are high-level guidelines for GitHub Copilot when working in the IREX project. The IREX framework is an AST-based backend code generator that currently targets:
-
-- Fastify (primary backend framework)
-- Express (secondary)
-- Mongoose (MongoDB)
-- Knex (SQL databases)
-- TypeScript (preferred)
-- JavaScript (allowed)
-
-Future runtimes like Go, Rust, C++, PHP, etc. will come later, but Copilot should not suggest them yet.
+These concise guidelines help Copilot work effectively in the IREX project, an AST-driven backend code generator for Node.js (Fastify/Express), Mongoose, Knex, and TypeScript/JavaScript.
 
 ---
 
-## 1. Project architecture
+## Project Structure
 
-IREX follows an AST (spec/DSL) → Template → Output pipeline.
-
-Key folders:
-- `internal/*` → AST (spec/DSL) builder, parser, generator, renderer, cli etc.
-- `cmd/irex/` → Build CLI commands - these commands will be used by end users
-- `cmd/irex-dev/` → Development commands - used during IREX generator development
-- `docs/` → Documentation
-- `gen/` → Generated example applications
-
-Copilot should help maintain consistent template structure, clean AST→render logic, modular generators (Fastify/Express, Mongoose/Knex), and a TypeScript-first approach.
+- `cmd/` – CLI entrypoints (`irex`, `irex-dev`)
+- `internal/` – Core engine: AST, CLI, codegen, templates
+- `internal/core/ast/` – Config, schema, service ASTs & templates
+- `internal/engines/node-ts/` – TypeScript codegen (bootstrap, schema, service)
+- `extensions/vscode/` – VS Code extension
+- `examples/` – Example generated apps
+- `docs/` – Documentation
+- `temp/` – Temporary/generated files
 
 ---
 
-## 2. Template file rules
+## Templates & Codegen
 
-Template files use extensions like `.ts.tpl` and `.js.tpl`. They must contain valid TypeScript/JavaScript with Go-template expressions when needed.
-
-Guidelines:
-
-- Generate idiomatic, minimal, clean TS/JS.
-- Never include business logic inside templates.
-- Keep templates pure and focused on structure.
-- Use Go template syntax only when necessary, for example:
-
-  {{ .Name }}
-  {{ range .Fields }}
-  {{ end }}
+- Template files: `.ts.tpl`, `.js.tpl` (TypeScript/JavaScript + Go template syntax)
+- Keep templates minimal, structural, and free of business logic
+- Use idiomatic, modern TypeScript/JavaScript
+- Use Go template expressions only for dynamic content (e.g. `{{ .Name }}`)
 
 ---
 
-## 3. Generated code rules
+## Generated Code
 
-Generated code should be simple, idiomatic and framework-appropriate.
-
-Fastify
-
-- Use `fastify.register()` for modules.
-- Route files should look like:
-
-```ts
-export default async function (fastify) {
-  fastify.get(...)
-  fastify.post(...)
-}
-```
-
-Prefer async/await and keep controllers minimal. For Express use `Router()`.
-
-Mongoose
-
-- Always define schemas with type-safe fields and timestamps.
-- Use `.lean()` for queries when possible.
-
-Knex
-
-- Use query builders and avoid raw SQL unless necessary.
+- Fastify: Use `fastify.register()`, async/await, minimal controllers
+- Express: Use `Router()`
+- Mongoose: Type-safe schemas, timestamps, prefer `.lean()`
+- Knex: Use query builder, avoid raw SQL
 
 ---
 
-## 4. Hook system guidelines
+## CLI & AST
 
-Hooks must be user-defined and never overwritten. Provide clean extension points and avoid embedding logic in generated files. Respect import patterns for hook files and only suggest stubs when asked.
-
-Example:
-
-```ts
-import * as UserHooks from "../../hooks/user.hooks";
-```
+- CLI commands: `irex init`, `irex dev`, `irex build`, `irex generate model|service|workflow <Name>`
+- AST/spec: Strict, minimal Go structs, JSON-friendly, extendable
 
 ---
 
-## 5. IREX CLI conventions
+## Code Style
 
-Common CLI commands:
-
-- `irex init`
-- `irex dev`
-- `irex build`
-- `irex generate model <ModelName>`
-- `irex generate service <ServiceName>`
-- `irex generate workflow <WorkflowName>`
-
-Copilot should follow this pattern, keep CLI commands modular, and use Cobra-like structures in Go when appropriate.
+- TypeScript: ES modules, async/await, strong typing, interfaces, named exports
+- Go: Idiomatic, small functions, minimal concurrency (core engine only)
 
 ---
 
-## 6. AST/spec guidelines
+## Hooks & Extensibility
 
-AST/spec is represented as structured Go data. Keep definitions strict, typed, minimalistic, JSON-friendly and extendable (workflows, models, services).
-
-Example:
-
-```go
-type ASTModel struct {
-  Name   string
-  Fields []ASTField
-}
-```
+- Hooks are user-defined, never overwritten
+- Generated files import hooks but do not embed logic
 
 ---
 
-## 7. Code style guidelines
+## Restrictions
 
-TypeScript:
-
-- Use ES modules (import … from).
-- Prefer async/await.
-- Strong typing; avoid `any`.
-- Use interfaces for DTOs and prefer named exports.
-
-Go (core engine only — `internal/*`):
-
-- Keep Go code idiomatic.
-- Avoid unnecessary concurrency.
-- Write small, simple functions.
+- Do not suggest code for unsupported languages (Rust, C++, PHP, etc.)
+- Do not add business logic to templates or generated files
 
 ---
 
-## 8. Restrictions / avoid
+## Copilot Goals
 
-Do not suggest application layer code in languages outside the current scope (Rust, C++, PHP, Python, etc.).
-
-Do not mix template syntax incorrectly, add business logic inside generated files, or suggest unnecessary abstractions.
+- Help with templates, AST→template mapping, CLI, codegen, docs, and extension structure
 
 ---
 
-## 9. Goals for Copilot assistance
+## If Unsure
 
-Help with:
-
-- Writing clean template files.
-- Mapping AST/spec → template placeholders.
-- Implementing CLI commands.
-- Structuring Fastify/Express modules.
-- Writing clean TypeScript/Javascript services.
-- Writing AST/spec builders/parsers in Go.
-- Documentation (`docs/*.md`).
-
----
-
-## 10. If unsure
-
-Prefer simplicity, minimalism, clean TypeScript, predictable AST/spec formats and consistent template structures.
-
----
-
-If you want, I can also generate additional repo helpers such as a Copilot contextual prompt, a Copilot Chat persona, a `CONTRIBUTING.md`, or a template linting ruleset — tell me which and I can add one.
-
-## 11. Run go commands
-
-### irex commands
-
-IREX user commands: These are used by end users of the IREX framework.
-```
-irex init # Initialize a new IREX project
-irex dev # Start development server with hot-reloading
-irex build # Build the IREX project
-```
-
-### irexd commands
-
-IREX development commands: These are used when developing IREX itself.
-
-```
-irexd init # Initialize IREX development environment
-irexd watch # Watch for changes (In project + go files) and rebuild IREX 
+- Prefer minimal, clean, idiomatic TypeScript and Go
+- Keep template and AST/spec structure predictable and simple

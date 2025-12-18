@@ -1,8 +1,9 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
+
+	"github.com/kwizyHQ/irex/internal/utils"
 )
 
 // Parse parses the HCL file at the given path and returns the ConfigDefinition struct
@@ -20,7 +21,7 @@ func GetJson(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	b, err := json.MarshalIndent(def, "", "  ")
+	b, err := utils.ToJSON(def)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal to JSON: %w", err)
 	}
