@@ -1,4 +1,4 @@
-package service
+package symbols
 
 // ServiceDefinition is the root struct for the services.hcl file
 type ServiceDefinition struct {

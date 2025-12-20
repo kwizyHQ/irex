@@ -1,3 +1,8 @@
+
+
+
+<h1 align="center" style="color:#3b82f6; font-size:2.5em; font-weight:bold; margin-bottom:0.5em;">Service Specifications</h1>
+
 # Rate Limiting System
 
 The IREX rate limiting system provides flexible, declarative controls for API usage. Rate limits are defined in the IR and can be applied globally, per-service, per-operation, or as custom presets. The system supports multiple strategies and is designed to be explicit and generator-friendly.

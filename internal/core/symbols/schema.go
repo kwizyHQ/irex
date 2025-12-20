@@ -1,6 +1,8 @@
-package schema
+package symbols
 
-import "github.com/zclconf/go-cty/cty"
+import (
+	"github.com/zclconf/go-cty/cty"
+)
 
 type MongoDBFieldCollation struct {
 	Locale          string `hcl:"locale,optional"`

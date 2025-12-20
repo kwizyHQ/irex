@@ -1,0 +1,5 @@
+# About IREX 
+
+`IREX:- Intermediate Representation Executor`
+
+IREX is a specification-driven code generation platform that converts a single, structured HCL definition into production-ready backend code across multiple runtimes and frameworks. Instead of writing the same APIs repeatedly, developers define models, services, policies, and workflows once, and IREX builds a fully validated Intermediate Representation (IR) that engines use to generate clean, idiomatic code. Its pipeline-based architecture separates parsing, semantic analysis, cross-validation, normalization, and generation, ensuring correctness and extensibility. Designed for CLI tools, language servers, and large teams, IREX enables consistent APIs, safer refactors, and faster backend development without locking users into a single language or framework.

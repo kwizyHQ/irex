@@ -4,22 +4,21 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/kwizyHQ/irex/internal/core/ast/schema"
+	"github.com/kwizyHQ/irex/internal/core/ast"
 	"github.com/kwizyHQ/irex/internal/utils"
 )
 
 func main() {
+	basePath := filepath.Join("temp")
+	// get flag --schema, --service, --config if present and parse the respective hcl file
 	fmt.Println("start parsing hcl file")
-	path := filepath.Join("internal", "core", "ast", "schema", "templates", "models.hcl")
-	resp, err := schema.GetJson(path)
+	path := filepath.Join(basePath, "schema", "models.hcl")
+	parsed, err := ast.ParseToJsonCommon(path, "schema")
 	if err != nil {
 		fmt.Println("error parsing hcl file:", err)
 		return
 	}
-	fmt.Println("completed parsing hcl file")
-	// write to output.json file in the same directory
-	outputPath := filepath.Join("internal", "core", "ast", "schema", "templates", "output.json")
-	err = utils.WriteToFile(outputPath, []byte(resp))
+	err = utils.WriteToFile(filepath.Join(basePath, "output.json"), []byte(parsed))
 	if err != nil {
 		fmt.Println("error writing to file:", err)
 		return

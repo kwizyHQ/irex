@@ -1,4 +1,4 @@
-package ast
+package shared
 
 import (
 	"github.com/zclconf/go-cty/cty"
