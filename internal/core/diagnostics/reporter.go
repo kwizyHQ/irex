@@ -44,3 +44,43 @@ func (r *Reporter) HasWarnings() bool {
 	}
 	return false
 }
+
+func (r *Reporter) Error(message string, Range Range, code string, source string) {
+	r.Add(Diagnostic{
+		Range:    Range,
+		Severity: SeverityError,
+		Message:  message,
+		Source:   source,
+		Code:     code,
+	})
+}
+
+func (r *Reporter) Warn(message string, Range Range, code string, source string) {
+	r.Add(Diagnostic{
+		Range:    Range,
+		Severity: SeverityWarning,
+		Message:  message,
+		Source:   source,
+		Code:     code,
+	})
+}
+
+func (r *Reporter) Info(message string, Range Range, code string, source string) {
+	r.Add(Diagnostic{
+		Range:    Range,
+		Severity: SeverityInformation,
+		Message:  message,
+		Source:   source,
+		Code:     code,
+	})
+}
+
+func (r *Reporter) Hint(message string, Range Range, code string, source string) {
+	r.Add(Diagnostic{
+		Range:    Range,
+		Severity: SeverityHint,
+		Message:  message,
+		Source:   source,
+		Code:     code,
+	})
+}

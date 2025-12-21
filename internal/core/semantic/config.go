@@ -10,285 +10,109 @@ type Diagnostic = diagnostics.Diagnostic
 // CheckConfigSemantics performs semantic checks on a ConfigDefinition struct and returns diagnostics for all issues found.
 func CheckConfigSemantics(cfg *symbols.ConfigDefinition) []Diagnostic {
 	reporter := diagnostics.NewReporter()
-	zeroRange := diagnostics.Range{
-		Start: diagnostics.Position{Line: 0, Column: 0, Byte: 0},
-		End:   diagnostics.Position{Line: 0, Column: 0, Byte: 0},
-	}
+	zeroRange := diagnostics.Range{}
+	source := "config"
 
 	if cfg.Project == nil {
-		reporter.Add(Diagnostic{
-			Range:    zeroRange,
-			Severity: diagnostics.SeverityError,
-			Message:  "Missing required 'project' block.",
-			Source:   "semantic",
-			Code:     "project.missing",
-		})
+		reporter.Error("Missing required 'project' block.", zeroRange, "project.missing", source)
 		return reporter.All()
 	}
 	p := cfg.Project
 
 	if p.Name == "" {
-		reporter.Add(Diagnostic{
-			Range:    zeroRange,
-			Severity: diagnostics.SeverityError,
-			Message:  "Project 'name' is required.",
-			Source:   "semantic",
-			Code:     "project.name.required",
-		})
+		reporter.Error("Project 'name' is required.", zeroRange, "project.name.required", source)
 	}
 	if p.Version == "" {
-		reporter.Add(Diagnostic{
-			Range:    zeroRange,
-			Severity: diagnostics.SeverityError,
-			Message:  "Project 'version' is required.",
-			Source:   "semantic",
-			Code:     "project.version.required",
-		})
+		reporter.Error("Project 'version' is required.", zeroRange, "project.version.required", source)
 	}
 	if p.Author == "" {
-		reporter.Add(Diagnostic{
-			Range:    zeroRange,
-			Severity: diagnostics.SeverityWarning,
-			Message:  "Project 'author' is required.",
-			Source:   "semantic",
-			Code:     "project.author.required",
-		})
+		reporter.Warn("Project 'author' is required.", zeroRange, "project.author.required", source)
 	}
 	if p.License == "" {
-		reporter.Add(Diagnostic{
-			Range:    zeroRange,
-			Severity: diagnostics.SeverityWarning,
-			Message:  "Project 'license' is required.",
-			Source:   "semantic",
-			Code:     "project.license.required",
-		})
+		reporter.Warn("Project 'license' is required.", zeroRange, "project.license.required", source)
 	}
 
 	if p.Paths == nil {
-		reporter.Add(Diagnostic{
-			Range:    zeroRange,
-			Severity: diagnostics.SeverityError,
-			Message:  "Missing required 'paths' block.",
-			Source:   "semantic",
-			Code:     "project.paths.missing",
-		})
+		reporter.Error("Missing required 'paths' block.", zeroRange, "project.paths.missing", source)
 	} else {
 		if p.Paths.Specifications == "" {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityError,
-				Message:  "'paths.specifications' is required.",
-				Source:   "semantic",
-				Code:     "project.paths.specifications.required",
-			})
+			reporter.Error("'paths.specifications' is required.", zeroRange, "project.paths.specifications.required", source)
 		}
 		if p.Paths.Templates == "" {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityWarning,
-				Message:  "'paths.templates' is required.",
-				Source:   "semantic",
-				Code:     "project.paths.templates.required",
-			})
+			reporter.Warn("'paths.templates' is required.", zeroRange, "project.paths.templates.required", source)
 		}
 		if p.Paths.Output == "" {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityError,
-				Message:  "'paths.output' is required.",
-				Source:   "semantic",
-				Code:     "project.paths.output.required",
-			})
+			reporter.Error("'paths.output' is required.", zeroRange, "project.paths.output.required", source)
 		}
 	}
 
 	if p.Generator == nil {
-		reporter.Add(Diagnostic{
-			Range:    zeroRange,
-			Severity: diagnostics.SeverityError,
-			Message:  "Missing required 'generator' block.",
-			Source:   "semantic",
-			Code:     "project.generator.missing",
-		})
+		reporter.Error("Missing required 'generator' block.", zeroRange, "project.generator.missing", source)
 	}
 
 	if p.Runtime == nil {
-		reporter.Add(Diagnostic{
-			Range:    zeroRange,
-			Severity: diagnostics.SeverityError,
-			Message:  "Missing required 'runtime' block.",
-			Source:   "semantic",
-			Code:     "project.runtime.missing",
-		})
+		reporter.Error("Missing required 'runtime' block.", zeroRange, "project.runtime.missing", source)
 	} else {
 		if p.Runtime.Name == "" {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityError,
-				Message:  "'runtime.name' is required.",
-				Source:   "semantic",
-				Code:     "project.runtime.name.required",
-			})
+			reporter.Error("'runtime.name' is required.", zeroRange, "project.runtime.name.required", source)
 		}
 		if p.Runtime.Version == "" {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityWarning,
-				Message:  "'runtime.version' is required.",
-				Source:   "semantic",
-				Code:     "project.runtime.version.required",
-			})
+			reporter.Warn("'runtime.version' is required.", zeroRange, "project.runtime.version.required", source)
 		}
 		if p.Runtime.Options == nil {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityError,
-				Message:  "Missing required 'runtime.options' block.",
-				Source:   "semantic",
-				Code:     "project.runtime.options.missing",
-			})
+			reporter.Error("Missing required 'runtime.options' block.", zeroRange, "project.runtime.options.missing", source)
 		} else {
 			if p.Runtime.Options.PackageManager == "" {
-				reporter.Add(Diagnostic{
-					Range:    zeroRange,
-					Severity: diagnostics.SeverityWarning,
-					Message:  "'runtime.options.package_manager' is required.",
-					Source:   "semantic",
-					Code:     "project.runtime.options.package_manager.required",
-				})
+				reporter.Warn("'runtime.options.package_manager' is required.", zeroRange, "project.runtime.options.package_manager.required", source)
 			}
 			if p.Runtime.Options.Entry == "" {
-				reporter.Add(Diagnostic{
-					Range:    zeroRange,
-					Severity: diagnostics.SeverityWarning,
-					Message:  "'runtime.options.entry' is required.",
-					Source:   "semantic",
-					Code:     "project.runtime.options.entry.required",
-				})
+				reporter.Warn("'runtime.options.entry' is required.", zeroRange, "project.runtime.options.entry.required", source)
 			}
 		}
 		if p.Runtime.Schema == nil {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityError,
-				Message:  "Missing required 'runtime.schema' block.",
-				Source:   "semantic",
-				Code:     "project.runtime.schema.missing",
-			})
+			reporter.Error("Missing required 'runtime.schema' block.", zeroRange, "project.runtime.schema.missing", source)
 		} else {
 			if p.Runtime.Schema.Framework == "" {
-				reporter.Add(Diagnostic{
-					Range:    zeroRange,
-					Severity: diagnostics.SeverityError,
-					Message:  "'runtime.schema.framework' is required.",
-					Source:   "semantic",
-					Code:     "project.runtime.schema.framework.required",
-				})
+				reporter.Error("'runtime.schema.framework' is required.", zeroRange, "project.runtime.schema.framework.required", source)
 			}
 			if p.Runtime.Schema.Options == nil {
-				reporter.Add(Diagnostic{
-					Range:    zeroRange,
-					Severity: diagnostics.SeverityError,
-					Message:  "Missing required 'runtime.schema.options' block.",
-					Source:   "semantic",
-					Code:     "project.runtime.schema.options.missing",
-				})
+				reporter.Error("Missing required 'runtime.schema.options' block.", zeroRange, "project.runtime.schema.options.missing", source)
 			} else {
 				// if p.Runtime.Schema.Options.URI == "" {
-				// 	reporter.Add(Diagnostic{
-				// 		Range:    zeroRange,
-				// 		Severity: diagnostics.SeverityWarning,
-				// 		Message:  "'runtime.schema.options.uri' is required.",
-				// 		Source:   "semantic",
-				// 		Code:     "project.runtime.schema.options.uri.required",
-				// 	})
+				// 	reporter.Warn("'runtime.schema.options.uri' is required.", zeroRange, "project.runtime.schema.options.uri.required", source)
 				// }
 				// if p.Runtime.Schema.Options.DB == "" {
-				// 	reporter.Add(Diagnostic{
-				// 		Range:    zeroRange,
-				// 		Severity: diagnostics.SeverityWarning,
-				// 		Message:  "'runtime.schema.options.db' is required.",
-				// 		Source:   "semantic",
-				// 		Code:     "project.runtime.schema.options.db.required",
-				// 	})
+				// 	reporter.Warn("'runtime.schema.options.db' is required.", zeroRange, "project.runtime.schema.options.db.required", source)
 				// }
 			}
 		}
 		if p.Runtime.Service == nil {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityError,
-				Message:  "Missing required 'runtime.service' block.",
-				Source:   "semantic",
-				Code:     "project.runtime.service.missing",
-			})
+			reporter.Error("Missing required 'runtime.service' block.", zeroRange, "project.runtime.service.missing", source)
 		} else {
 			if p.Runtime.Service.Framework == "" {
-				reporter.Add(Diagnostic{
-					Range:    zeroRange,
-					Severity: diagnostics.SeverityError,
-					Message:  "'runtime.service.framework' is required.",
-					Source:   "semantic",
-					Code:     "project.runtime.service.framework.required",
-				})
+				reporter.Error("'runtime.service.framework' is required.", zeroRange, "project.runtime.service.framework.required", source)
 			}
 			if p.Runtime.Service.Options == nil {
-				reporter.Add(Diagnostic{
-					Range:    zeroRange,
-					Severity: diagnostics.SeverityError,
-					Message:  "Missing required 'runtime.service.options' block.",
-					Source:   "semantic",
-					Code:     "project.runtime.service.options.missing",
-				})
+				reporter.Error("Missing required 'runtime.service.options' block.", zeroRange, "project.runtime.service.options.missing", source)
 			} else {
 				if p.Runtime.Service.Options.Port == 0 {
-					reporter.Add(Diagnostic{
-						Range:    zeroRange,
-						Severity: diagnostics.SeverityWarning,
-						Message:  "'runtime.service.options.port' is required and must be > 0.",
-						Source:   "semantic",
-						Code:     "project.runtime.service.options.port.required",
-					})
+					reporter.Warn("'runtime.service.options.port' is required and must be > 0.", zeroRange, "project.runtime.service.options.port.required", source)
 				}
 				if p.Runtime.Service.Options.Host == "" {
-					reporter.Add(Diagnostic{
-						Range:    zeroRange,
-						Severity: diagnostics.SeverityWarning,
-						Message:  "'runtime.service.options.host' is required.",
-						Source:   "semantic",
-						Code:     "project.runtime.service.options.host.required",
-					})
+					reporter.Warn("'runtime.service.options.host' is required.", zeroRange, "project.runtime.service.options.host.required", source)
 				}
 			}
 		}
 	}
 
 	if p.Meta == nil {
-		reporter.Add(Diagnostic{
-			Range:    zeroRange,
-			Severity: diagnostics.SeverityInformation,
-			Message:  "Missing optional 'meta' block.",
-			Source:   "semantic",
-			Code:     "project.meta.missing",
-		})
+		reporter.Info("Missing optional 'meta' block.", zeroRange, "project.meta.missing", source)
 	} else {
 		if p.Meta.CreatedAt == "" {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityInformation,
-				Message:  "'meta.created_at' is recommended.",
-				Source:   "semantic",
-				Code:     "project.meta.created_at.recommended",
-			})
+			reporter.Info("'meta.created_at' is recommended.", zeroRange, "project.meta.created_at.recommended", source)
 		}
 		if p.Meta.GeneratorVersion == "" {
-			reporter.Add(Diagnostic{
-				Range:    zeroRange,
-				Severity: diagnostics.SeverityInformation,
-				Message:  "'meta.generator_version' is recommended.",
-				Source:   "semantic",
-				Code:     "project.meta.generator_version.recommended",
-			})
+			reporter.Info("'meta.generator_version' is recommended.", zeroRange, "project.meta.generator_version.recommended", source)
 		}
 	}
 

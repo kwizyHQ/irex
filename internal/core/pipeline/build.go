@@ -1,13 +1,21 @@
 package pipeline
 
 import (
+	"os"
+
 	"github.com/kwizyHQ/irex/internal/core/ast"
 	"github.com/kwizyHQ/irex/internal/core/diagnostics"
+	"github.com/kwizyHQ/irex/internal/core/semantic"
 )
 
 func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	r := diagnostics.NewReporter()
 	ctx := &BuildContext{}
+
+	if !checkFileExists(opts.ConfigPath) {
+		r.Error("Config file does not exist.", diagnostics.Range{}, "config.not_found", "pipeline")
+		return ctx, r.All()
+	}
 
 	// ---------------- Config AST Decode ----------------
 	configAST, err := ast.ParseHCLCommon(opts.ConfigPath, "config")
@@ -71,18 +79,18 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 		return ctx, r.All()
 	}
 
-	// // ---------------- Semantic ----------------
+	// ---------------- Semantic ----------------
 
-	// reporter.Extend(
-	// 	semantic.ValidateModels(ctx.ModelsAST),
-	// )
+	r.Extend(
+		semantic.CheckConfigSemantics(ctx.ConfigAST),
+	)
 	// reporter.Extend(
 	// 	semantic.ValidateServices(ctx.ServicesAST),
 	// )
 
-	// if reporter.HasErrors() {
-	// 	return ctx, reporter.All()
-	// }
+	if r.HasErrors() {
+		return ctx, r.All()
+	}
 
 	// // ---------------- Cross Validation ----------------
 
@@ -103,4 +111,11 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	// ctx.IR = irBundle
 
 	return ctx, r.All()
+}
+
+func checkFileExists(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }

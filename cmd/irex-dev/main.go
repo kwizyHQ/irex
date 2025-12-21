@@ -8,6 +8,7 @@ import (
 
 	formatCmd "github.com/kwizyHQ/irex/internal/cli/common/format"
 	initcmd "github.com/kwizyHQ/irex/internal/cli/common/init"
+	validateCmd "github.com/kwizyHQ/irex/internal/cli/common/validate"
 	"github.com/spf13/cobra"
 )
 
@@ -32,6 +33,7 @@ func main() {
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(watchCmd)
 	rootCmd.AddCommand(formatCmd.NewFormatCmd())
+	rootCmd.AddCommand(validateCmd.NewValidateCmd())
 
 	// Handle Ctrl+C (SIGINT) gracefully
 	sigs := make(chan os.Signal, 1)
