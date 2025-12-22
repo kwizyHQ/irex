@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/ast"
 	"github.com/kwizyHQ/irex/internal/core/diagnostics"
@@ -33,22 +34,70 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	}
 
 	// ---------------- Other AST Decode ----------------
+	schemaPath := filepath.Join(ctx.ConfigAST.Project.Paths.Specifications, "schema")
+	// fileName (with extension) inside the schemaPath
+	if !checkFileExists(schemaPath) {
+		r.Error("Schema path does not exist: "+schemaPath, diagnostics.Range{}, "schema.path_not_found", "pipeline")
+		return ctx, r.All()
+	}
+	var schemaFiles []string
+	err = filepath.Walk(schemaPath, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() && (filepath.Ext(path) == ".hcl") {
+			schemaFiles = append(schemaFiles, path)
+		}
+		return nil
+	})
+	if err != nil {
+		r.Error("Error reading schema files: "+err.Error(), diagnostics.Range{}, "schema.read_error", "pipeline")
+		return ctx, r.All()
+	}
+	// now parse all schema files and build combined ModelsAST
+	var schemaContainsError bool
+	for _, filePath := range schemaFiles {
+		parsedAST, err := ast.ParseHCLCommon(filePath, "schema")
+		if err != nil {
+			r.FromHCL(err)
+			schemaContainsError = true
+			continue
+		}
+		schemaAST := parsedAST.(*ast.SchemaAST)
+		// if ctx.SchemaAST is nil, initialize it
+		if ctx.SchemaAST == nil {
+			ctx.SchemaAST = schemaAST
+		} else {
+			// merge ModelsBlock
+			ctx.SchemaAST.ModelsBlock.Models = append(ctx.SchemaAST.ModelsBlock.Models, schemaAST.ModelsBlock.Models...)
+		}
+	}
+	if schemaContainsError {
+		return ctx, r.All()
+	}
 
-	// ctx.ModelsAST = &ast.ModelsAST{}
-	// reporter.Extend(
-	// 	diagnostics.FromHCL(
-	// 		ast.DecodeFile(opts.ModelsPath, ctx.ModelsAST),
-	// 		"ast",
-	// 	),
-	// )
-
-	// ctx.ServicesAST = &ast.ServicesAST{}
-	// reporter.Extend(
-	// 	diagnostics.FromHCL(
-	// 		ast.DecodeFile(opts.ServicesPath, ctx.ServicesAST),
-	// 		"ast",
-	// 	),
-	// )
+	servicesPath := filepath.Join(ctx.ConfigAST.Project.Paths.Specifications, "service")
+	if !checkFileExists(servicesPath) {
+		r.Error("Services file does not exist.", diagnostics.Range{}, "project.paths.specs", "pipeline")
+		return ctx, r.All()
+	}
+	// ToDo: support multiple service files like schema
+	// for now, just parse single service file pick first available .hcl file in servicesPath
+	var serviceFile string
+	err = filepath.Walk(servicesPath, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() && (filepath.Ext(path) == ".hcl") {
+			serviceFile = path
+			return filepath.SkipDir // stop after first file
+		}
+		return nil
+	})
+	if err != nil {
+		r.Error("Error reading service files: "+err.Error(), diagnostics.Range{}, "service.read_error", "pipeline")
+		return ctx, r.All()
+	}
+	serviceAst, err := ast.ParseHCLCommon(serviceFile, "service")
+	if err != nil {
+		r.FromHCL(err)
+		return ctx, r.All()
+	}
+	ctx.ServicesAST = serviceAst.(*ast.ServicesAST)
 
 	// if reporter.HasErrors() {
 	// 	return ctx, reporter.All()
@@ -84,9 +133,12 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	r.Extend(
 		semantic.CheckConfigSemantics(ctx.ConfigAST),
 	)
-	// reporter.Extend(
-	// 	semantic.ValidateServices(ctx.ServicesAST),
-	// )
+	r.Extend(
+		semantic.CheckServiceSemantics(ctx.ServicesAST),
+	)
+	r.Extend(
+		semantic.CheckSchemaSemantics(ctx.SchemaAST),
+	)
 
 	if r.HasErrors() {
 		return ctx, r.All()

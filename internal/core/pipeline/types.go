@@ -4,7 +4,7 @@ import "github.com/kwizyHQ/irex/internal/core/ast"
 
 type BuildContext struct {
 	ConfigAST   *ast.ConfigAST
-	ModelsAST   *ast.ModelsAST
+	SchemaAST   *ast.SchemaAST
 	ServicesAST *ast.ServicesAST
 	// add more ASTs as needed
 }

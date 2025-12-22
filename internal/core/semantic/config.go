@@ -5,8 +5,6 @@ import (
 	"github.com/kwizyHQ/irex/internal/core/symbols"
 )
 
-type Diagnostic = diagnostics.Diagnostic
-
 // CheckConfigSemantics performs semantic checks on a ConfigDefinition struct and returns diagnostics for all issues found.
 func CheckConfigSemantics(cfg *symbols.ConfigDefinition) []Diagnostic {
 	reporter := diagnostics.NewReporter()

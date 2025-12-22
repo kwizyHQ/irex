@@ -9,7 +9,7 @@ import (
 )
 
 type ConfigAST = symbols.ConfigDefinition
-type ModelsAST = symbols.ModelsSpec
+type SchemaAST = symbols.ModelsSpec
 type ServicesAST = symbols.ServiceDefinition
 
 func parseConfigHCL(path string) (*symbols.ConfigDefinition, error) {
