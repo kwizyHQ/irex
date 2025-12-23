@@ -7,6 +7,7 @@ import (
 	"github.com/kwizyHQ/irex/internal/core/ast"
 	"github.com/kwizyHQ/irex/internal/core/diagnostics"
 	"github.com/kwizyHQ/irex/internal/core/semantic"
+	"github.com/kwizyHQ/irex/internal/core/validate"
 )
 
 func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
@@ -144,15 +145,13 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 		return ctx, r.All()
 	}
 
-	// // ---------------- Cross Validation ----------------
+	// ---------------- Cross Validation: Service Model References ----------------
+	// Validate that all service model references exist in schema
+	r.Extend(validate.ValidateServiceAST(ctx.ServicesAST, ctx.SchemaAST))
 
-	// reporter.Extend(
-	// 	validate.ValidateServiceModelRefs(reg),
-	// )
-
-	// if reporter.HasErrors() {
-	// 	return ctx, reporter.All()
-	// }
+	if r.HasErrors() {
+		return ctx, r.All()
+	}
 
 	// // ---------------- Normalize ----------------
 

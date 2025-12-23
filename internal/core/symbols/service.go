@@ -129,6 +129,7 @@ type Service struct {
 	Apply           []ApplyBlock      `hcl:"apply,block"`
 	Operations      []Operation       `hcl:"operation,block"`
 	Services        []Service         `hcl:"service,block"`
+	Defaults        *ServiceDefaults  `hcl:"defaults,block"`
 }
 
 type ServiceRateLimit struct {
