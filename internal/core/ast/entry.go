@@ -83,3 +83,15 @@ func ParseToJsonCommon(path string, fileType string) (string, error) {
 	def, err = utils.ToJSON(parsed)
 	return def.(string), err
 }
+
+func ParseHCL[T any](path string) (*T, error) {
+	var def T
+	ctx := &hcl.EvalContext{
+		Functions: shared.ASTFunctions,
+	}
+	err := hclsimple.DecodeFile(path, ctx, &def)
+	if err != nil {
+		return nil, err
+	}
+	return &def, nil
+}

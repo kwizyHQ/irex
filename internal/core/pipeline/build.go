@@ -5,18 +5,19 @@ import (
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/ast"
-	"github.com/kwizyHQ/irex/internal/core/diagnostics"
 	"github.com/kwizyHQ/irex/internal/core/semantic"
 	"github.com/kwizyHQ/irex/internal/core/validate"
+	"github.com/kwizyHQ/irex/internal/diagnostics"
+	"github.com/kwizyHQ/irex/internal/ir"
 )
 
-func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
+func Build(opts BuildOptions) (*ir.IRBundle, []diagnostics.Diagnostic) {
 	r := diagnostics.NewReporter()
 	ctx := &BuildContext{}
 
 	if !checkFileExists(opts.ConfigPath) {
 		r.Error("Config file does not exist.", diagnostics.Range{}, "config.not_found", "pipeline")
-		return ctx, r.All()
+		return nil, r.All()
 	}
 
 	// ---------------- Config AST Decode ----------------
@@ -31,7 +32,7 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 
 	if r.HasErrors() {
 		// return early if there are errors in config parsing as other steps depend on it
-		return ctx, r.All()
+		return nil, r.All()
 	}
 
 	// ---------------- Other AST Decode ----------------
@@ -39,7 +40,7 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	// fileName (with extension) inside the schemaPath
 	if !checkFileExists(schemaPath) {
 		r.Error("Schema path does not exist: "+schemaPath, diagnostics.Range{}, "schema.path_not_found", "pipeline")
-		return ctx, r.All()
+		return nil, r.All()
 	}
 	var schemaFiles []string
 	err = filepath.Walk(schemaPath, func(path string, info os.FileInfo, err error) error {
@@ -50,7 +51,7 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	})
 	if err != nil {
 		r.Error("Error reading schema files: "+err.Error(), diagnostics.Range{}, "schema.read_error", "pipeline")
-		return ctx, r.All()
+		return nil, r.All()
 	}
 	// now parse all schema files and build combined ModelsAST
 	var schemaContainsError bool
@@ -71,13 +72,13 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 		}
 	}
 	if schemaContainsError {
-		return ctx, r.All()
+		return nil, r.All()
 	}
 
 	servicesPath := filepath.Join(ctx.ConfigAST.Project.Paths.Specifications, "service")
 	if !checkFileExists(servicesPath) {
 		r.Error("Services file does not exist.", diagnostics.Range{}, "project.paths.specs", "pipeline")
-		return ctx, r.All()
+		return nil, r.All()
 	}
 	// ToDo: support multiple service files like schema
 	// for now, just parse single service file pick first available .hcl file in servicesPath
@@ -91,17 +92,17 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	})
 	if err != nil {
 		r.Error("Error reading service files: "+err.Error(), diagnostics.Range{}, "service.read_error", "pipeline")
-		return ctx, r.All()
+		return nil, r.All()
 	}
 	serviceAst, err := ast.ParseHCLCommon(serviceFile, "service")
 	if err != nil {
 		r.FromHCL(err)
-		return ctx, r.All()
+		return nil, r.All()
 	}
 	ctx.ServicesAST = serviceAst.(*ast.ServicesAST)
 
 	// if reporter.HasErrors() {
-	// 	return ctx, reporter.All()
+	// 	return nil, reporter.All()
 	// }
 
 	// // ---------------- Registry ----------------
@@ -126,7 +127,7 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	// ctx.Registry = reg
 
 	if r.HasErrors() {
-		return ctx, r.All()
+		return nil, r.All()
 	}
 
 	// ---------------- Semantic ----------------
@@ -142,7 +143,7 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	)
 
 	if r.HasErrors() {
-		return ctx, r.All()
+		return nil, r.All()
 	}
 
 	// ---------------- Cross Validation: Service Model References ----------------
@@ -150,18 +151,14 @@ func Build(opts BuildOptions) (*BuildContext, []diagnostics.Diagnostic) {
 	r.Extend(validate.ValidateServiceAST(ctx.ServicesAST, ctx.SchemaAST))
 
 	if r.HasErrors() {
-		return ctx, r.All()
+		return nil, r.All()
 	}
 
 	// // ---------------- Normalize ----------------
 
-	// norm := normalize.New(reg)
-	// irBundle, normDiags := norm.BuildIR()
-	// reporter.Extend(normDiags)
-
 	// ctx.IR = irBundle
 
-	return ctx, r.All()
+	return ctx.ir, r.All()
 }
 
 func checkFileExists(path string) bool {

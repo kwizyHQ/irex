@@ -1,8 +1,8 @@
 package semantic
 
 import (
-	"github.com/kwizyHQ/irex/internal/core/diagnostics"
 	"github.com/kwizyHQ/irex/internal/core/symbols"
+	"github.com/kwizyHQ/irex/internal/diagnostics"
 )
 
 // CheckSchemaSemantics performs semantic checks on a ModelsSpec and returns diagnostics for all issues found.

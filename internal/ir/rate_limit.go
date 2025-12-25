@@ -21,14 +21,12 @@ type RateLimit struct {
 	Response   *RateLimitResponse `json:"response,omitempty"`
 }
 
-// DefaultRateLimit contains values merged from top-level defaults.
-type DefaultRateLimit struct {
-	Action     string             `json:"action,omitempty"`
-	Type       string             `json:"type,omitempty"`
-	CountKey   []string           `json:"count_key,omitempty"`
-	Limit      string             `json:"limit,omitempty"`
-	BucketSize *int               `json:"bucket_size,omitempty"`
-	RefillRate string             `json:"refill_rate,omitempty"`
-	Burst      *int               `json:"burst,omitempty"`
-	Response   *RateLimitResponse `json:"response,omitempty"`
+type CustomRateLimit struct {
+	Name    string `json:"name"`
+	Handler string `json:"handler"`
+}
+
+type RateLimits struct {
+	Presets *[]RateLimit       `json:"presets,omitempty"`
+	Customs *[]CustomRateLimit `json:"customs,omitempty"`
 }

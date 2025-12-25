@@ -1,8 +1,8 @@
 package validate
 
 import (
-	"github.com/kwizyHQ/irex/internal/core/diagnostics"
 	"github.com/kwizyHQ/irex/internal/core/symbols"
+	"github.com/kwizyHQ/irex/internal/diagnostics"
 )
 
 // ValidateServiceAST checks that all model names referenced in serviceAst are defined in schemaAst.

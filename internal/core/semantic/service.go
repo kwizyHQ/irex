@@ -1,8 +1,8 @@
 package semantic
 
 import (
-	"github.com/kwizyHQ/irex/internal/core/diagnostics"
 	"github.com/kwizyHQ/irex/internal/core/symbols"
+	"github.com/kwizyHQ/irex/internal/diagnostics"
 )
 
 // CheckServiceSemantics performs semantic checks on a ServiceDefinition and returns diagnostics for all issues found.

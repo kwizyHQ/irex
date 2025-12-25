@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kwizyHQ/irex/internal/core/diagnostics"
 	"github.com/kwizyHQ/irex/internal/core/pipeline"
+	"github.com/kwizyHQ/irex/internal/diagnostics"
 	"github.com/spf13/cobra"
 )
 

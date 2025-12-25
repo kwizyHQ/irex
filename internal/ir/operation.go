@@ -15,3 +15,7 @@ type Operation struct {
 	// Resolved route/handler name for generators
 	Route *Route `json:"route,omitempty"`
 }
+
+type Operations struct {
+	Operations *[]Operation `json:"operations,omitempty"`
+}
