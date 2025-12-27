@@ -1,105 +1,68 @@
 package pipeline
 
 import (
-	"os"
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/ast"
+	"github.com/kwizyHQ/irex/internal/core/normalize"
 	"github.com/kwizyHQ/irex/internal/core/semantic"
+	"github.com/kwizyHQ/irex/internal/core/symbols"
 	"github.com/kwizyHQ/irex/internal/core/validate"
 	"github.com/kwizyHQ/irex/internal/diagnostics"
 	"github.com/kwizyHQ/irex/internal/ir"
 )
 
-func Build(opts BuildOptions) (*ir.IRBundle, []diagnostics.Diagnostic) {
+func Build(opts BuildOptions) (*ir.IRBundle, error) {
 	r := diagnostics.NewReporter()
-	ctx := &BuildContext{}
-
-	if !checkFileExists(opts.ConfigPath) {
-		r.Error("Config file does not exist.", diagnostics.Range{}, "config.not_found", "pipeline")
-		return nil, r.All()
+	ctx := &BuildContext{
+		ConfigAST: &symbols.ConfigDefinition{},
+		SchemaAST: &symbols.ModelsSpec{
+			ModelsBlock: &symbols.ModelsBlock{
+				Models: make([]symbols.Model, 0),
+			},
+		},
+		ServicesAST: &symbols.ServiceDefinition{},
+		ir:          &ir.IRBundle{},
 	}
 
-	// ---------------- Config AST Decode ----------------
-	configAST, err := ast.ParseHCLCommon(opts.ConfigPath, "config")
-
-	if err != nil {
-		r.FromHCL(err)
-	}
-
-	ctx.ConfigAST = configAST.(*ast.ConfigAST)
-	// ---------------- End Config AST Decode ----------------
-
-	if r.HasErrors() {
-		// return early if there are errors in config parsing as other steps depend on it
-		return nil, r.All()
+	// ------------------- Config AST Decode ----------------
+	diags := ast.ParseHCL(opts.ConfigPath, ctx.ConfigAST).(diagnostics.Diagnostics)
+	if diags.HasErrors() {
+		return nil, diags
 	}
 
 	// ---------------- Other AST Decode ----------------
 	schemaPath := filepath.Join(ctx.ConfigAST.Project.Paths.Specifications, "schema")
-	// fileName (with extension) inside the schemaPath
-	if !checkFileExists(schemaPath) {
-		r.Error("Schema path does not exist: "+schemaPath, diagnostics.Range{}, "schema.path_not_found", "pipeline")
-		return nil, r.All()
-	}
-	var schemaFiles []string
-	err = filepath.Walk(schemaPath, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() && (filepath.Ext(path) == ".hcl") {
-			schemaFiles = append(schemaFiles, path)
-		}
-		return nil
-	})
-	if err != nil {
-		r.Error("Error reading schema files: "+err.Error(), diagnostics.Range{}, "schema.read_error", "pipeline")
-		return nil, r.All()
-	}
-	// now parse all schema files and build combined ModelsAST
+	files, _ := filepath.Glob(filepath.Join(schemaPath, "*.hcl"))
+
 	var schemaContainsError bool
-	for _, filePath := range schemaFiles {
-		parsedAST, err := ast.ParseHCLCommon(filePath, "schema")
-		if err != nil {
-			r.FromHCL(err)
+	for _, path := range files {
+		var spec symbols.ModelsSpec
+		// We assume ParseHCL now handles the pointer internally
+		if diags := ast.ParseHCL(path, &spec).(diagnostics.Diagnostics); diags.HasErrors() {
 			schemaContainsError = true
+			r.Extend(diags)
 			continue
 		}
-		schemaAST := parsedAST.(*ast.SchemaAST)
-		// if ctx.SchemaAST is nil, initialize it
-		if ctx.SchemaAST == nil {
-			ctx.SchemaAST = schemaAST
-		} else {
-			// merge ModelsBlock
-			ctx.SchemaAST.ModelsBlock.Models = append(ctx.SchemaAST.ModelsBlock.Models, schemaAST.ModelsBlock.Models...)
+		// Direct append using the spread operator (...)
+		if spec.ModelsBlock != nil {
+			ctx.SchemaAST.ModelsBlock.Models = append(ctx.SchemaAST.ModelsBlock.Models, spec.ModelsBlock.Models...)
 		}
 	}
+
 	if schemaContainsError {
 		return nil, r.All()
 	}
 
 	servicesPath := filepath.Join(ctx.ConfigAST.Project.Paths.Specifications, "service")
-	if !checkFileExists(servicesPath) {
-		r.Error("Services file does not exist.", diagnostics.Range{}, "project.paths.specs", "pipeline")
-		return nil, r.All()
-	}
-	// ToDo: support multiple service files like schema
-	// for now, just parse single service file pick first available .hcl file in servicesPath
-	var serviceFile string
-	err = filepath.Walk(servicesPath, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() && (filepath.Ext(path) == ".hcl") {
-			serviceFile = path
-			return filepath.SkipDir // stop after first file
-		}
-		return nil
-	})
-	if err != nil {
+	files, err := filepath.Glob(filepath.Join(servicesPath, "*.hcl"))
+	if err != nil || len(files) == 0 {
 		r.Error("Error reading service files: "+err.Error(), diagnostics.Range{}, "service.read_error", "pipeline")
 		return nil, r.All()
 	}
-	serviceAst, err := ast.ParseHCLCommon(serviceFile, "service")
-	if err != nil {
-		r.FromHCL(err)
-		return nil, r.All()
-	}
-	ctx.ServicesAST = serviceAst.(*ast.ServicesAST)
+	r.Extend(
+		ast.ParseHCL(files[0], ctx.ServicesAST).(diagnostics.Diagnostics),
+	)
 
 	// if reporter.HasErrors() {
 	// 	return nil, reporter.All()
@@ -130,25 +93,25 @@ func Build(opts BuildOptions) (*ir.IRBundle, []diagnostics.Diagnostic) {
 		return nil, r.All()
 	}
 
-	// ---------------- Semantic ----------------
+	// ---------------- Validations ----------------
 
 	r.Extend(
-		semantic.CheckConfigSemantics(ctx.ConfigAST),
+		validate.ValidateConfig(ctx.ConfigAST),
 	)
 	r.Extend(
-		semantic.CheckServiceSemantics(ctx.ServicesAST),
+		validate.ValidateService(ctx.ServicesAST),
 	)
 	r.Extend(
-		semantic.CheckSchemaSemantics(ctx.SchemaAST),
+		validate.ValidateSchema(ctx.SchemaAST),
 	)
 
 	if r.HasErrors() {
 		return nil, r.All()
 	}
 
-	// ---------------- Cross Validation: Service Model References ----------------
+	// ---------------- Cross Validation: Semantic checks ----------------
 	// Validate that all service model references exist in schema
-	r.Extend(validate.ValidateServiceAST(ctx.ServicesAST, ctx.SchemaAST))
+	r.Extend(semantic.CheckServiceSemantic(ctx.ServicesAST, ctx.SchemaAST))
 
 	if r.HasErrors() {
 		return nil, r.All()
@@ -156,14 +119,7 @@ func Build(opts BuildOptions) (*ir.IRBundle, []diagnostics.Diagnostic) {
 
 	// // ---------------- Normalize ----------------
 
-	// ctx.IR = irBundle
+	normalize.NormalizeServiceAST(ctx.ServicesAST)
 
 	return ctx.ir, r.All()
-}
-
-func checkFileExists(path string) bool {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return false
-	}
-	return true
 }

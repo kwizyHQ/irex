@@ -1,4 +1,4 @@
-package semantic
+package validate
 
 import "github.com/kwizyHQ/irex/internal/diagnostics"
 

@@ -66,6 +66,7 @@ type RateLimitResponse struct {
 type RateLimitPreset struct {
 	Name       string             `hcl:"name,label"`
 	Limit      string             `hcl:"limit,optional"`
+	Action     string             `hcl:"action,optional"`
 	Type       string             `hcl:"type,optional"`
 	CountKey   []string           `hcl:"count_key,optional"`
 	RefillRate string             `hcl:"refill_rate,optional"`
@@ -120,6 +121,7 @@ type Service struct {
 	Name            string            `hcl:"name,label"`
 	Model           string            `hcl:"model,optional"`
 	Expose          *bool             `hcl:"expose,optional"`
+	Pagination      *bool             `hcl:"pagination,optional"`
 	Path            string            `hcl:"path,optional"`
 	CrudOperations  []string          `hcl:"crud_operations,optional"`
 	BatchOperations []string          `hcl:"batch_operations,optional"`

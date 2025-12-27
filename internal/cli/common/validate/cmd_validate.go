@@ -29,12 +29,7 @@ func NewValidateCmd() *cobra.Command {
 				ConfigPath: configPath,
 			})
 			_ = ctx // ctx can be used for further processing if needed
-			if len(diags) > 0 {
-				for _, d := range diags {
-					printDiagnostic(d)
-				}
-				return fmt.Errorf("validation failed with %d diagnostic(s)", len(diags))
-			}
+			print(diags.Error())
 			fmt.Println("Validation successful.")
 			return nil
 		},

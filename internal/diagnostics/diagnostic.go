@@ -24,6 +24,15 @@ type Diagnostic struct {
 
 type Diagnostics []Diagnostic
 
+func (d Diagnostics) HasErrors() bool {
+	for _, diag := range d {
+		if diag.Severity == SeverityError {
+			return true
+		}
+	}
+	return false
+}
+
 // New creates a new Diagnostic
 func New(rng Range, severity Severity, message, source, code string) Diagnostic {
 	return Diagnostic{

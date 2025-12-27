@@ -1,12 +1,10 @@
-semantic/
+Purpose: Cross-file correctness
 
-Purpose: Intra-file semantic checks
-
-✔ Field combinations
-✔ Required blocks
-✔ Mutually exclusive options
-✔ Enum/value constraints
+✔ Model usage in services
+✔ Policy references
+✔ Workflow → action resolution
+✔ Override legality
 
 Key rule:
 
-Semantic checks do not resolve references
+Validation reads Registry + AST, never mutates

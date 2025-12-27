@@ -1,12 +1,12 @@
-package semantic
+package validate
 
 import (
 	"github.com/kwizyHQ/irex/internal/core/symbols"
 	"github.com/kwizyHQ/irex/internal/diagnostics"
 )
 
-// CheckConfigSemantics performs semantic checks on a ConfigDefinition struct and returns diagnostics for all issues found.
-func CheckConfigSemantics(cfg *symbols.ConfigDefinition) []Diagnostic {
+// ValidateConfig performs semantic checks on a ConfigDefinition struct and returns diagnostics for all issues found.
+func ValidateConfig(cfg *symbols.ConfigDefinition) []Diagnostic {
 	reporter := diagnostics.NewReporter()
 	zeroRange := diagnostics.Range{}
 	source := "config"

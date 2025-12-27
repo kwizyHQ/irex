@@ -1,10 +1,12 @@
-Purpose: Cross-file correctness
+semantic/
 
-✔ Model usage in services
-✔ Policy references
-✔ Workflow → action resolution
-✔ Override legality
+Purpose: Intra-file semantic checks
+
+✔ Field combinations
+✔ Required blocks
+✔ Mutually exclusive options
+✔ Enum/value constraints
 
 Key rule:
 
-Validation reads Registry + AST, never mutates
+Semantic checks do not resolve references

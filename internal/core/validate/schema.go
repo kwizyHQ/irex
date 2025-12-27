@@ -1,12 +1,12 @@
-package semantic
+package validate
 
 import (
 	"github.com/kwizyHQ/irex/internal/core/symbols"
 	"github.com/kwizyHQ/irex/internal/diagnostics"
 )
 
-// CheckSchemaSemantics performs semantic checks on a ModelsSpec and returns diagnostics for all issues found.
-func CheckSchemaSemantics(spec *symbols.ModelsSpec) []Diagnostic {
+// ValidateSchema performs semantic checks on a ModelsSpec and returns diagnostics for all issues found.
+func ValidateSchema(spec *symbols.ModelsSpec) []Diagnostic {
 	reporter := diagnostics.NewReporter()
 	zeroRange := diagnostics.Range{}
 	source := "schema"
