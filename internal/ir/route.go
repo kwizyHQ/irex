@@ -1,20 +1,31 @@
 package ir
 
-// Route represents a resolved HTTP route that maps to a service operation
-// or a global operation. It is a convenience struct used by generators
-// to build routers.
-type Route struct {
-	Name        string   `json:"name,omitempty"`
-	ServiceName string   `json:"service_name,omitempty"`
-	Operation   string   `json:"operation,omitempty"`
-	Method      string   `json:"method,omitempty"`
-	Path        string   `json:"path,omitempty"`
-	Description string   `json:"description,omitempty"`
+type IRRoute struct {
+	ID     string `json:"id"`
+	Method string `json:"method"`
+	Path   string `json:"path"`
+
+	Service   string `json:"service,omitempty"`
+	Operation string `json:"operation"`
+
 	Middlewares []string `json:"middlewares,omitempty"`
-	Policies    []string `json:"policies,omitempty"`
-	RateLimits  []string `json:"rate_limits,omitempty"`
+
+	// request-time enforcement
+	RequestPolicies []string `json:"request_policies,omitempty"`
+
+	// always applied
+	BaseRateLimits []string `json:"base_rate_limits,omitempty"`
+
+	// conditional (policy-dependent)
+	PolicyRateLimits []IRPolicyRateLimit `json:"policy_rate_limits,omitempty"`
+
+	// post-resource
+	ResourcePolicies []string `json:"resource_policies,omitempty"`
 }
 
-type Routes struct {
-	Routes *[]Route `json:"routes,omitempty"`
+type IRPolicyRateLimit struct {
+	Policy string `json:"policy"`     // policy name
+	Rate   string `json:"rate_limit"` // rate limit name
 }
+
+type IRRoutes map[string]IRRoute

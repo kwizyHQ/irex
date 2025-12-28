@@ -8,11 +8,12 @@ package ir
 // Config is the top-level object produced after parsing, validation
 // and defaults-merge. Generators should consume this structure.
 type IRBundle struct {
-	Services         *Services       `json:"services,omitempty"`
-	Middlewares      *Middlewares    `json:"middlewares,omitempty"`
-	Routes           *Routes         `json:"routes,omitempty"`
-	Operations       *Operations     `json:"operations,omitempty"`
-	RateLimits       *RateLimits     `json:"rate_limits,omitempty"`
-	RequestPolicies  *RequestPolicy  `json:"request_policies,omitempty"`
-	ResourcePolicies *ResourcePolicy `json:"response_policies,omitempty"`
+	Http             IRHttpConfig       `json:"http"`
+	Services         IRServices         `json:"services"`
+	Operations       IROperations       `json:"operations"`
+	Routes           IRRoutes           `json:"routes"`
+	Middlewares      IRMiddlewares      `json:"middlewares"`
+	RequestPolicies  IRRequestPolicies  `json:"request_policies"`
+	ResourcePolicies IRResourcePolicies `json:"resource_policies"`
+	RateLimits       IRRateLimits       `json:"rate_limits"`
 }

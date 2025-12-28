@@ -7,6 +7,27 @@ import (
 	"github.com/kwizyHQ/irex/internal/core/symbols"
 )
 
+func SafeSet(parentField, childField reflect.Value) {
+	if !childField.CanSet() {
+		return
+	}
+
+	// Check if we are dealing with a pointer
+	if parentField.Kind() == reflect.Ptr && !parentField.IsNil() {
+		// Create a BRAND NEW memory address of the same type
+		newValue := reflect.New(parentField.Type().Elem())
+
+		// Copy the value from the parent address to the new address
+		newValue.Elem().Set(parentField.Elem())
+
+		// Point the child to our new, independent memory address
+		childField.Set(newValue)
+	} else {
+		// For non-pointers (int, string, etc.), Set() copies by value automatically
+		childField.Set(parentField)
+	}
+}
+
 // MergeDefaults merges parent values into child. parent is parentDefaults, and child is childDefaults.
 // Child must be a pointer so it can be modified.
 func MergeDefaults(parent any, child any) {
@@ -32,8 +53,8 @@ func MergeDefaults(parent any, child any) {
 		parentField := pVal.Field(i)
 
 		// If child field is empty (Zero Value), take from parent
-		if childField.CanSet() && childField.IsZero() {
-			childField.Set(parentField)
+		if childField.IsZero() {
+			SafeSet(parentField, childField)
 		}
 	}
 }
@@ -75,9 +96,7 @@ func MergeFromDefaults(source any, target any) {
 		// 4. Do the types match?
 		// print info about target and src field like name value type etc
 		if targetField.IsValid() && targetField.CanSet() && targetField.IsZero() {
-			if targetField.Type() == srcField.Type() {
-				targetField.Set(srcField)
-			}
+			SafeSet(srcField, targetField)
 		}
 	}
 }
