@@ -3,8 +3,8 @@ package pipeline
 import (
 	"path/filepath"
 
+	"github.com/kwizyHQ/irex/internal/core/assemble"
 	"github.com/kwizyHQ/irex/internal/core/ast"
-	irbuilder "github.com/kwizyHQ/irex/internal/core/ir_builder"
 	"github.com/kwizyHQ/irex/internal/core/normalize"
 	"github.com/kwizyHQ/irex/internal/core/semantic"
 	"github.com/kwizyHQ/irex/internal/core/shared"
@@ -123,7 +123,7 @@ func Build(opts shared.BuildOptions) (*shared.IRBundle, error) {
 	normalize.NormalizeServiceAST(ctx.ServicesAST)
 
 	// ---------------- IR Build ----------------
-	err = irbuilder.PrepareIR(ctx)
+	err = assemble.ProjectIR(ctx)
 
 	if err != nil {
 		r.Error("IR Build error: "+err.Error(), diagnostics.Range{}, "ir.build_error", "pipeline")
