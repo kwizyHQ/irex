@@ -1,9 +1,28 @@
 package ir
 
+type PathSegmentKind string
+
+const (
+	SegmentStatic   PathSegmentKind = "static"
+	SegmentParam    PathSegmentKind = "param"
+	SegmentWildcard PathSegmentKind = "wildcard"
+	SegmentCatchAll PathSegmentKind = "catch_all"
+	SegmentRegex    PathSegmentKind = "regex"
+	SegmentOptional PathSegmentKind = "optional"
+)
+
+type PathSegment struct {
+	Kind    PathSegmentKind
+	Name    string // param name, wildcard name
+	Literal string // static literal
+	Regex   string
+}
+
 type IRRoute struct {
-	ID     string `json:"id"`
-	Method string `json:"method"`
-	Path   string `json:"path"`
+	ID       string        `json:"id"`
+	Method   string        `json:"method"`
+	Path     string        `json:"path"`
+	Segments []PathSegment `json:"segments,omitempty"`
 
 	Service   string `json:"service,omitempty"`
 	Operation string `json:"operation"`

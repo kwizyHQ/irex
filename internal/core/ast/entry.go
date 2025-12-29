@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsimple"
-	"github.com/kwizyHQ/irex/internal/core/shared"
+	"github.com/kwizyHQ/irex/internal/core/functions"
 	"github.com/kwizyHQ/irex/internal/diagnostics"
 	"github.com/kwizyHQ/irex/internal/utils"
 )
@@ -17,7 +17,7 @@ func ParseHCL[T any](path string, def *T) error {
 		return r.All()
 	}
 	ctx := &hcl.EvalContext{
-		Functions: shared.ASTFunctions,
+		Functions: functions.ASTFunctions,
 	}
 	err := hclsimple.DecodeFile(path, ctx, def)
 	r.FromHCL(err)

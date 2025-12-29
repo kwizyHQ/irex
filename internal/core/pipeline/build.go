@@ -4,25 +4,26 @@ import (
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/ast"
+	irbuilder "github.com/kwizyHQ/irex/internal/core/ir_builder"
 	"github.com/kwizyHQ/irex/internal/core/normalize"
 	"github.com/kwizyHQ/irex/internal/core/semantic"
+	"github.com/kwizyHQ/irex/internal/core/shared"
 	"github.com/kwizyHQ/irex/internal/core/symbols"
 	"github.com/kwizyHQ/irex/internal/core/validate"
 	"github.com/kwizyHQ/irex/internal/diagnostics"
-	"github.com/kwizyHQ/irex/internal/ir"
 )
 
-func Build(opts BuildOptions) (*ir.IRBundle, error) {
+func Build(opts shared.BuildOptions) (*shared.IRBundle, error) {
 	r := diagnostics.NewReporter()
-	ctx := &BuildContext{
-		ConfigAST: &symbols.ConfigDefinition{},
-		SchemaAST: &symbols.ModelsSpec{
+	ctx := &shared.BuildContext{
+		ConfigAST: &shared.ConfigAST{},
+		SchemaAST: &shared.SchemaAST{
 			ModelsBlock: &symbols.ModelsBlock{
 				Models: make([]symbols.Model, 0),
 			},
 		},
-		ServicesAST: &symbols.ServiceDefinition{},
-		ir:          &ir.IRBundle{},
+		ServicesAST: &shared.ServicesAST{},
+		IR:          &shared.IRBundle{},
 	}
 
 	// ------------------- Config AST Decode ----------------
@@ -121,5 +122,12 @@ func Build(opts BuildOptions) (*ir.IRBundle, error) {
 
 	normalize.NormalizeServiceAST(ctx.ServicesAST)
 
-	return ctx.ir, r.All()
+	// ---------------- IR Build ----------------
+	err = irbuilder.PrepareIR(ctx)
+
+	if err != nil {
+		r.Error("IR Build error: "+err.Error(), diagnostics.Range{}, "ir.build_error", "pipeline")
+	}
+
+	return ctx.IR, r.All()
 }

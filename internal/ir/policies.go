@@ -1,20 +1,25 @@
 package ir
 
-type IRRequestPolicy struct {
-	Name        string `json:"name"`
-	Rule        string `json:"rule"`
-	Effect      string `json:"effect"` // allow | deny
-	Description string `json:"description,omitempty"`
+type PolicyEffect string
 
-	// Deterministic tag for rate-limit binding
-	Tag string `json:"tag"`
+const (
+	PolicyAllow PolicyEffect = "allow"
+	PolicyDeny  PolicyEffect = "deny"
+)
+
+type IRPolicyBase struct {
+	Name        string       `json:"name"`
+	Rule        string       `json:"rule"`
+	Effect      PolicyEffect `json:"effect"`
+	Description string       `json:"description,omitempty"`
+}
+
+type IRRequestPolicy struct {
+	IRPolicyBase
 }
 
 type IRResourcePolicy struct {
-	Name        string `json:"name"`
-	Rule        string `json:"rule"`
-	Effect      string `json:"effect"` // allow | deny
-	Description string `json:"description,omitempty"`
+	IRPolicyBase
 }
 
 type IRRequestPolicies map[string]IRRequestPolicy
