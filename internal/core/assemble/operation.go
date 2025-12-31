@@ -23,7 +23,7 @@ func joinPath(base, seg string) string {
 
 // prepareInferredOperationsIR infers basic CRUD operations for model-based services.
 // For now it will not create a full set, only a minimal example for 'list' and 'read'.
-func prepareInferredOperationsIR(ctx *shared.BuildContext, svc symbols.Service, parentService string) error {
+func prepareInferredOperationsIR(ctx *shared.BuildContext, svc *symbols.Service, parentService string) error {
 	if svc.Model == "" {
 		return nil
 	}
@@ -172,7 +172,7 @@ func prepareInferredOperationsIR(ctx *shared.BuildContext, svc symbols.Service, 
 
 // prepareOperationIR converts a symbols.Operation into an ir.IROperation and
 // registers routes by calling prepareRouteIR.
-func prepareOperationIR(ctx *shared.BuildContext, op symbols.Operation, serviceName string) error {
+func prepareOperationIR(ctx *shared.BuildContext, op *symbols.Operation, serviceName string) error {
 	if ctx == nil {
 		return nil
 	}
@@ -206,7 +206,7 @@ func prepareOperationIR(ctx *shared.BuildContext, op symbols.Operation, serviceN
 	ctx.IR.Operations[name] = irop
 
 	// create route for this operation
-	if err := prepareRouteIR(ctx, name, method, path, serviceName, &op); err != nil {
+	if err := prepareRouteIR(ctx, name, method, path, serviceName, op); err != nil {
 		return err
 	}
 

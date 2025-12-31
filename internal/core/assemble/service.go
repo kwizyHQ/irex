@@ -9,7 +9,7 @@ import (
 // prepareServiceIR converts a symbols.Service into an ir.IRService and
 // registers it in the bundle. It also collects middlewares/policies at service level
 // into the IRRoutes and IROperations later via apply blocks.
-func prepareServiceIR(ctx *shared.BuildContext, svc symbols.Service, parent string) error {
+func prepareServiceIR(ctx *shared.BuildContext, svc *symbols.Service, parent string) error {
 	if ctx == nil {
 		return nil
 	}

@@ -13,7 +13,6 @@ func ProjectIR(ctx *shared.BuildContext) error {
 		return nil
 	}
 
-	bundle := ir.IRBundle{}
 	// delegate to specialized preparers
 	if err := preparePoliciesIR(ctx); err != nil {
 		return err
@@ -22,9 +21,9 @@ func ProjectIR(ctx *shared.BuildContext) error {
 		return err
 	}
 
-	srv := ctx.ServicesAST.Services
+	if ctx.IR == nil {
+		bundle := ir.IRBundle{}
 
-	if srv == nil {
 		ctx.IR = &bundle
 		return nil
 	}
@@ -57,7 +56,8 @@ func ProjectIR(ctx *shared.BuildContext) error {
 		if walkCtx.Services == nil {
 			return
 		}
-		for _, svc := range *walkCtx.Services {
+		for i := range *walkCtx.Services {
+			svc := &(*walkCtx.Services)[i]
 			// process service call prepareServiceIR
 			prepareServiceIR(ctx, svc, walkCtx.ParentService)
 			// infer operations from service in case of model-based service
@@ -70,7 +70,8 @@ func ProjectIR(ctx *shared.BuildContext) error {
 		}
 		// process operations at this level
 		if walkCtx.Operations != nil {
-			for _, op := range *walkCtx.Operations {
+			for i := range *walkCtx.Operations {
+				op := &(*walkCtx.Operations)[i]
 				prepareOperationIR(ctx, op, walkCtx.ParentService)
 			}
 		}
