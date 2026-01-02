@@ -9,7 +9,7 @@ import (
 // PrepareIR prepares an IRBundle from parsed ASTs available in ctx.
 // It currently maps HTTP settings, services and operations into the IR.
 func ProjectIR(ctx *shared.BuildContext) error {
-	if ctx == nil && ctx.ServicesAST == nil {
+	if ctx == nil {
 		return nil
 	}
 
@@ -18,6 +18,12 @@ func ProjectIR(ctx *shared.BuildContext) error {
 		return err
 	}
 	if err := prepareRateLimitsIR(ctx); err != nil {
+		return err
+	}
+	if err := prepareConfigIR(ctx); err != nil {
+		return err
+	}
+	if err := prepareModelsIR(ctx); err != nil {
 		return err
 	}
 

@@ -10,6 +10,8 @@ package ir
 type IRBundle struct {
 	Http             IRHttpConfig       `json:"http"`
 	Services         IRServices         `json:"services"`
+	Models           IRModels           `json:"models"`
+	Config           IRConfig           `json:"config"`
 	Operations       IROperations       `json:"operations"`
 	Routes           IRRoutes           `json:"routes"`
 	Middlewares      IRMiddlewares      `json:"middlewares"`
