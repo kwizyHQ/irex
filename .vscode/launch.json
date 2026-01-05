@@ -12,6 +12,15 @@
             "args": ["validate", "./temp/fastify-mongoose.hcl"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug: irexd scaffold",
+            "type": "go",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmd/irex-dev",
+            "args": ["init", "node-ts"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
         }
     ]
 }

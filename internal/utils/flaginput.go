@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -38,6 +39,17 @@ func AskFlagInput(opt InputOption, dest interface{}) error {
 	if opt.Required {
 		validate = survey.Required
 	}
+	// check if dest is already have a value (non-zero)
+	v := reflect.ValueOf(dest)
+	if v.Kind() != reflect.Ptr {
+		return fmt.Errorf("dest must be a pointer")
+	}
+	elem := v.Elem()
+	zeroValue := reflect.Zero(elem.Type()).Interface()
+	if !reflect.DeepEqual(elem.Interface(), zeroValue) {
+		// already has a value, skip prompt
+		return nil
+	}
 
 	var prompt survey.Prompt
 	switch opt.Type {
@@ -72,11 +84,17 @@ func AskFlagInput(opt InputOption, dest interface{}) error {
 	default:
 		return fmt.Errorf("unsupported input type")
 	}
-
+	var err error
 	if validate != nil {
-		return survey.AskOne(prompt, dest, survey.WithValidator(validate))
+		err = survey.AskOne(prompt, dest, survey.WithValidator(validate))
+	} else {
+		err = survey.AskOne(prompt, dest)
 	}
-	return survey.AskOne(prompt, dest)
+	if err != nil && err.Error() == "interrupt" {
+		fmt.Println("\nInput cancelled by user.")
+		os.Exit(1)
+	}
+	return err
 }
 
 // OsEnvCheck is a helper to check if an environment variable is set then update its value to the pointer

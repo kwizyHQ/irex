@@ -1,0 +1,35 @@
+package plan
+
+import (
+	"path/filepath"
+
+	"github.com/kwizyHQ/irex/internal/core/pipeline"
+	"github.com/kwizyHQ/irex/internal/core/shared"
+)
+
+type LoadIR struct {
+	IRPath string
+}
+
+func (s *LoadIR) ID() string {
+	return "load:ir"
+}
+
+func (s *LoadIR) Name() string {
+	return "Load Intermediate Representation"
+}
+
+func (s *LoadIR) Description() string {
+	return "Loads the Intermediate Representation (IR) from the specified path to the Plan Context. default path is 'irex.hcl'."
+}
+
+func (s *LoadIR) Run(ctx *PlanContext) error {
+	irBundle, err := pipeline.Build(shared.BuildOptions{
+		ConfigPath: filepath.Join(ctx.TargetDir, s.IRPath),
+	})
+	if err != nil {
+		return err
+	}
+	ctx.IR = *irBundle
+	return nil
+}
