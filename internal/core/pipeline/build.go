@@ -13,7 +13,11 @@ import (
 	"github.com/kwizyHQ/irex/internal/diagnostics"
 )
 
-func Build(opts shared.BuildOptions) (*shared.IRBundle, error) {
+type BuildOptions struct {
+	ConfigPath string
+}
+
+func Build(opts BuildOptions) (*shared.IRBundle, error) {
 	r := diagnostics.NewReporter()
 	ctx := &shared.BuildContext{
 		ConfigAST: &shared.ConfigAST{},

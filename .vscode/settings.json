@@ -1,6 +1,6 @@
 {
     "files.associations": {
-        "*.ts.tpl": "typescript",
-        "*.js.tpl": "javascript"
+        // "*.ts.tpl": "typescript",
+        // "*.js.tpl": "javascript"
     }
 }

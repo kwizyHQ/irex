@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/pipeline"
-	"github.com/kwizyHQ/irex/internal/core/shared"
 )
 
 type LoadIR struct {
@@ -24,7 +23,7 @@ func (s *LoadIR) Description() string {
 }
 
 func (s *LoadIR) Run(ctx *PlanContext) error {
-	irBundle, err := pipeline.Build(shared.BuildOptions{
+	irBundle, err := pipeline.Build(pipeline.BuildOptions{
 		ConfigPath: filepath.Join(ctx.TargetDir, s.IRPath),
 	})
 	if err != nil {

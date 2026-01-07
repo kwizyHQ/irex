@@ -17,7 +17,3 @@ type BuildContext struct {
 	// add more ASTs as needed
 	IR *IRBundle
 }
-
-type BuildOptions struct {
-	ConfigPath string
-}

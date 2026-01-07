@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/pipeline"
-	"github.com/kwizyHQ/irex/internal/core/shared"
 	"github.com/kwizyHQ/irex/internal/diagnostics"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +25,7 @@ func NewValidateCmd() *cobra.Command {
 				}
 			}
 			println("Validating config file:", configPath)
-			ctx, diags := pipeline.Build(shared.BuildOptions{
+			ctx, diags := pipeline.Build(pipeline.BuildOptions{
 				ConfigPath: configPath,
 			})
 			_ = ctx // ctx can be used for further processing if needed
