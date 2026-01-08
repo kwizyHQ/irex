@@ -31,9 +31,14 @@ func Build(opts BuildOptions) (*shared.IRBundle, error) {
 	}
 
 	// ------------------- Config AST Decode ----------------
-	diags := ast.ParseHCL(opts.ConfigPath, ctx.ConfigAST).(diagnostics.Diagnostics)
-	if diags.HasErrors() {
-		return nil, diags
+	r.Extend(ast.ParseHCL(opts.ConfigPath, ctx.ConfigAST).(diagnostics.Diagnostics))
+
+	r.Extend(
+		validate.ValidateConfig(ctx.ConfigAST),
+	)
+
+	if r.HasErrors() {
+		return nil, r.Err()
 	}
 
 	// ---------------- Other AST Decode ----------------
@@ -62,8 +67,8 @@ func Build(opts BuildOptions) (*shared.IRBundle, error) {
 	servicesPath := filepath.Join(ctx.ConfigAST.Project.Paths.Specifications, "service")
 	files, err := filepath.Glob(filepath.Join(servicesPath, "*.hcl"))
 	if err != nil || len(files) == 0 {
-		r.Error("Error reading service files: "+err.Error(), diagnostics.Range{}, "service.read_error", "pipeline")
-		return nil, r.All()
+		r.Error("Warning we couln't found any service files, please add some.", diagnostics.Range{}, "service.read_error", "pipeline")
+		return nil, r.Err()
 	}
 	r.Extend(
 		ast.ParseHCL(files[0], ctx.ServicesAST).(diagnostics.Diagnostics),
@@ -100,9 +105,6 @@ func Build(opts BuildOptions) (*shared.IRBundle, error) {
 
 	// ---------------- Validations ----------------
 
-	r.Extend(
-		validate.ValidateConfig(ctx.ConfigAST),
-	)
 	r.Extend(
 		validate.ValidateService(ctx.ServicesAST),
 	)

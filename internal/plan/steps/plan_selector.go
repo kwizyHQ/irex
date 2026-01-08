@@ -10,6 +10,7 @@ type plansMap = map[string]func(ctx *PlanContext) *Plan
 
 type PlanSelectorStep struct {
 	PlansMap plansMap
+	GetByKey func(ctx *PlanContext) string // get function to get delayed value for specified key in context
 }
 
 func (s *PlanSelectorStep) ID() string {

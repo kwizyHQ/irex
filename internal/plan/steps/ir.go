@@ -1,7 +1,6 @@
 package plan
 
 import (
-	"log/slog"
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/pipeline"
@@ -32,6 +31,5 @@ func (s *LoadIR) Run(ctx *PlanContext) error {
 		return err
 	}
 	ctx.IR = irBundle
-	slog.Info("ir is set: " + ctx.IR.Http.BasePath)
 	return nil
 }
