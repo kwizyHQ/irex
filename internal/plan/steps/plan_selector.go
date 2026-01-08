@@ -9,8 +9,9 @@ import (
 type plansMap = map[string]func(ctx *PlanContext) *Plan
 
 type PlanSelectorStep struct {
-	PlansMap plansMap
-	GetByKey func(ctx *PlanContext) string // get function to get delayed value for specified key in context
+	PlansMap        plansMap
+	Key             string
+	DeferLoadingKey func(ctx *PlanContext) string // get function to get delayed value for specified key in context
 }
 
 func (s *PlanSelectorStep) ID() string {
@@ -27,11 +28,17 @@ func (s *PlanSelectorStep) Description() string {
 
 func (s *PlanSelectorStep) Run(ctx *PlanContext) error {
 	// Example selection logic; in practice, this would be more complex
-	planKey := ctx.IR.Config.Runtime.Name // This could be derived from ctx or other parameters
+	var planKey string
+	if s.Key != "" {
+		planKey = s.Key
+	} else if s.DeferLoadingKey != nil {
+		planKey = s.DeferLoadingKey(ctx)
+	}
 	if planFunc, exists := s.PlansMap[planKey]; exists {
 		selectedPlan := planFunc(ctx)
-		slog.Info(selectedPlan.Name)
 		return selectedPlan.Execute(ctx)
+	} else {
+		slog.Error("No plan found for key: " + planKey)
 	}
 	return nil
 }

@@ -5,11 +5,13 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"time"
 
 	nodets "github.com/kwizyHQ/irex/internal/engines/node-ts"
 	"github.com/kwizyHQ/irex/internal/ir"
 	"github.com/kwizyHQ/irex/internal/plan"
 	. "github.com/kwizyHQ/irex/internal/plan/steps"
+	"github.com/kwizyHQ/irex/internal/watcher"
 	"github.com/spf13/cobra"
 )
 
@@ -43,20 +45,46 @@ func Run() *cobra.Command {
 						PlansMap: map[string]func(ctx *plan.PlanContext) *plan.Plan{
 							"node-ts": nodets.NodeTSWatchPlan,
 						},
-						GetByKey: func(psCtx *plan.PlanContext) string {
+						DeferLoadingKey: func(psCtx *plan.PlanContext) string {
 							return psCtx.IR.Config.Runtime.Name
 						},
 					},
 				},
 			}
 
-			slog.Info("Starting the watcher.")
-			err := watchPlan.Execute(&planCtx)
-
-			if err != nil {
-				slog.Error(err.Error())
+			// 🔹 1. Initial execution
+			slog.Info("Initial build")
+			if err := watchPlan.Execute(&planCtx); err != nil {
+				slog.Error("initial build failed", "err", err)
+				os.Exit(1)
 			}
 
+			// 🔹 2. Start watcher
+			mgr := watcher.NewManager(
+				[]string{
+					"irex.hcl",
+					"temp",
+				},
+				300*time.Millisecond,
+				func(ctx context.Context, events []watcher.Event) error {
+					slog.Info("Change detected, rebuilding", "events", len(events))
+					for _, ev := range events {
+						slog.Info(" - "+ev.Path, "type", ev.Type)
+					}
+					// IMPORTANT: reuse same PlanContext
+					// Later you can diff IR / runtime here
+					return watchPlan.Execute(&planCtx)
+				},
+				false,
+			)
+
+			go func() {
+				if err := mgr.Run(ctx); err != nil {
+					slog.Error("watcher stopped", "err", err)
+				}
+			}()
+
+			slog.Info("Watcher running")
 			<-ctx.Done()
 		},
 	}
