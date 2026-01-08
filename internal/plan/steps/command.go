@@ -3,6 +3,8 @@ package plan
 import (
 	"os"
 	"os/exec"
+
+	. "github.com/kwizyHQ/irex/internal/plan"
 )
 
 type CommandStep struct {

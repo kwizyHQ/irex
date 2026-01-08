@@ -3,6 +3,8 @@ package plan
 import (
 	"os"
 	"path/filepath"
+
+	. "github.com/kwizyHQ/irex/internal/plan"
 )
 
 type CreateFoldersStep struct {

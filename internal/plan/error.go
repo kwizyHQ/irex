@@ -1,6 +1,8 @@
 package plan
 
-import "os"
+import (
+	"os"
+)
 
 type PlanError struct {
 	StepID  string

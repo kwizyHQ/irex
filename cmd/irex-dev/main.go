@@ -2,17 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/dotenv-org/godotenvvault"
 	formatCmd "github.com/kwizyHQ/irex/internal/cli/common/format"
 	initcmd "github.com/kwizyHQ/irex/internal/cli/common/init"
 	validateCmd "github.com/kwizyHQ/irex/internal/cli/common/validate"
+	"github.com/kwizyHQ/irex/internal/cli/common/watch"
 	"github.com/spf13/cobra"
 )
 
@@ -48,32 +46,15 @@ func main() {
 	}
 
 	initCmd := initcmd.Run()
-
-	var watchCmd = &cobra.Command{
-		Use:   "watch",
-		Short: "Watch mode (placeholder)",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("watch command not implemented yet")
-			os.Exit(0)
-		},
-	}
+	watchCmd := watch.Run()
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(watchCmd)
-	rootCmd.AddCommand(formatCmd.NewFormatCmd())
+	rootCmd.AddCommand(formatCmd.Run())
 	rootCmd.AddCommand(validateCmd.NewValidateCmd())
 
-	// Handle Ctrl+C (SIGINT) gracefully
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT)
-	go func() {
-		<-sigs
-		fmt.Println("\nInterrupted (Ctrl+C). Exiting...")
-		os.Exit(130)
-	}()
-
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		slog.Error(err.Error())
 		os.Exit(1)
 	}
 }

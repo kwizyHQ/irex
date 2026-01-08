@@ -1,9 +1,11 @@
 package plan
 
 import (
+	"log/slog"
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/pipeline"
+	. "github.com/kwizyHQ/irex/internal/plan"
 )
 
 type LoadIR struct {
@@ -29,6 +31,7 @@ func (s *LoadIR) Run(ctx *PlanContext) error {
 	if err != nil {
 		return err
 	}
-	ctx.IR = *irBundle
+	ctx.IR = irBundle
+	slog.Info("ir is set: " + ctx.IR.Http.BasePath)
 	return nil
 }

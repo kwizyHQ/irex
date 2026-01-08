@@ -5,7 +5,8 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/kwizyHQ/irex/internal/plan"
+	. "github.com/kwizyHQ/irex/internal/plan"
+	. "github.com/kwizyHQ/irex/internal/plan/steps"
 )
 
 //go:embed all:templates
@@ -22,51 +23,51 @@ var templatesFS embed.FS
 //   - create src/* folders and basic files (.env.example, README.md, src/app.ts, src/vendor/server.ts)
 func Scaffold() error {
 	target := os.Getenv("IREX_TARGET")
-	ctx := plan.PlanContext{
+	ctx := PlanContext{
 		TargetDir:   target,
 		ProjectName: os.Getenv("IREX_NAME"),
 	}
 	return NodeTsScaffold(&ctx).Execute(&ctx)
 }
 
-func NodeTsScaffold(ctx *plan.PlanContext) *plan.Plan {
+func NodeTsScaffold(ctx *PlanContext) *Plan {
 	subFS, err := fs.Sub(templatesFS, "templates")
 	if err != nil {
-		return &plan.Plan{
+		return &Plan{
 			Name: "Node TypeScript Scaffold",
 			ID:   "scaffold-node-ts",
-			Steps: []plan.Step{
-				&plan.PlanError{
+			Steps: []Step{
+				&PlanError{
 					StepID:  "scaffold-init",
 					Message: "failed to load embedded templates filesystem: " + err.Error(),
 				},
 			},
 		}
 	}
-	return &plan.Plan{
+	return &Plan{
 		Name: "Node TypeScript Scaffold",
 		ID:   "scaffold-node-ts",
-		Steps: []plan.Step{
-			&plan.LoadIR{IRPath: "irex.hcl"},
-			&plan.CommandStep{
+		Steps: []Step{
+			&LoadIR{IRPath: "irex.hcl"},
+			&CommandStep{
 				Args: []string{"npm", "init", "-y"},
 			},
-			&plan.CommandStep{
+			&CommandStep{
 				Args: []string{"npm", "pkg", "set", "name=" + ctx.ProjectName},
 			},
-			&plan.CommandStep{
+			&CommandStep{
 				DescriptionOverride: "Install dev dependencies",
 				Args: []string{"npm", "install", "-D",
 					"typescript", "ts-node", "@types/node", "@types/dotenv", "nodemon",
 				},
 			},
-			&plan.CommandStep{
+			&CommandStep{
 				DescriptionOverride: "Install dependencies",
 				Args: []string{"npm", "install", "--save",
 					"dotenv", "axios", "pino", "fastify", "mongoose",
 				},
 			},
-			&plan.CreateFoldersStep{
+			&CreateFoldersStep{
 				Folders: []string{
 					"src",
 					"src/hooks",
@@ -76,7 +77,7 @@ func NodeTsScaffold(ctx *plan.PlanContext) *plan.Plan {
 					"src/workflows",
 				},
 			},
-			&plan.CopyFilesStep{
+			&CopyFilesStep{
 				FS: subFS,
 				FilesCopy: map[string]string{
 					"scaffold/app.ts":       "src/app.ts",
@@ -86,7 +87,7 @@ func NodeTsScaffold(ctx *plan.PlanContext) *plan.Plan {
 					"scaffold/nodemon.json": "nodemon.json",
 				},
 			},
-			&plan.CommandStep{
+			&CommandStep{
 				DescriptionOverride: "Initialize TypeScript configuration",
 				Args:                []string{"npx", "tsc", "--init"},
 			},

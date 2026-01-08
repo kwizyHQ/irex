@@ -21,6 +21,15 @@
             "args": ["init", "node-ts"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug: irexd watch",
+            "type": "go",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmd/irex-dev",
+            "args": ["watch"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
         }
     ]
 }

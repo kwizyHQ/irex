@@ -14,7 +14,7 @@ type Logger interface {
 type PlanContext struct {
 	TargetDir   string
 	ProjectName string
-	IR          ir.IRBundle
+	IR          *ir.IRBundle
 	// Logger      Logger
 }
 
@@ -42,21 +42,21 @@ type Step interface {
 }
 
 type PlanStep struct {
-	plan *Plan
+	Plan *Plan
 }
 
 func (ps *PlanStep) ID() string {
-	return ps.plan.ID
+	return ps.Plan.ID
 }
 
 func (ps *PlanStep) Name() string {
-	return ps.plan.Name
+	return ps.Plan.Name
 }
 
 func (ps *PlanStep) Description() string {
-	return ps.plan.Description
+	return ps.Plan.Description
 }
 
 func (ps *PlanStep) Run(ctx *PlanContext) error {
-	return ps.plan.Execute(ctx)
+	return ps.Plan.Execute(ctx)
 }

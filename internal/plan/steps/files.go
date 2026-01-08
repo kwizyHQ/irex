@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	. "github.com/kwizyHQ/irex/internal/plan"
 )
 
 type CopyFilesStep struct {

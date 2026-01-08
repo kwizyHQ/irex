@@ -133,5 +133,5 @@ func Build(opts BuildOptions) (*shared.IRBundle, error) {
 		r.Error("IR Build error: "+err.Error(), diagnostics.Range{}, "ir.build_error", "pipeline")
 	}
 
-	return ctx.IR, r.All()
+	return ctx.IR, r.Err()
 }
