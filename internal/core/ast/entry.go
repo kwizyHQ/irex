@@ -25,8 +25,8 @@ func ParseHCL[T any](path string, def *T) error {
 }
 
 func ParseToJson[T any](path string, def *T) (string, error) {
-	err := ParseHCL(path, def)
-	if err != nil {
+	err := ParseHCL(path, def).(diagnostics.Diagnostics)
+	if err.HasErrors() {
 		return "", err
 	}
 	return utils.ToJSON(def)

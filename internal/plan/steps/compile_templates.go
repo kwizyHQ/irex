@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	. "github.com/kwizyHQ/irex/internal/plan"
+	"github.com/kwizyHQ/irex/internal/plan"
 	"github.com/kwizyHQ/irex/internal/tempdir"
 )
 
@@ -35,7 +35,7 @@ func (s *CompileTemplatesStep) Description() string {
 	return "Compiles templates from the specified directory."
 }
 
-func (s *CompileTemplatesStep) Run(ctx *PlanContext) error {
+func (s *CompileTemplatesStep) Run(ctx *plan.PlanContext) error {
 	// user override folder
 	uTP := ctx.IR.Config.Paths.Templates
 	uR := ctx.IR.Config.Runtime.Name

@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	. "github.com/kwizyHQ/irex/internal/plan"
+	"github.com/kwizyHQ/irex/internal/plan"
 )
 
 type CopyFilesStep struct {
@@ -33,7 +33,7 @@ func (c *CopyFilesStep) Description() string {
 	return "Copies files and directories into the target project"
 }
 
-func (c *CopyFilesStep) Run(ctx *PlanContext) error {
+func (c *CopyFilesStep) Run(ctx *plan.PlanContext) error {
 	if c.FS == nil {
 		return fmt.Errorf("source filesystem is nil")
 	}

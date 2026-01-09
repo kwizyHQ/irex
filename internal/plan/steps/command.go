@@ -4,7 +4,7 @@ import (
 	"os"
 	"os/exec"
 
-	. "github.com/kwizyHQ/irex/internal/plan"
+	"github.com/kwizyHQ/irex/internal/plan"
 )
 
 type CommandStep struct {
@@ -28,7 +28,7 @@ func (c *CommandStep) Description() string {
 	return "Executes a command in the target directory."
 }
 
-func (c *CommandStep) Run(ctx *PlanContext) error {
+func (c *CommandStep) Run(ctx *plan.PlanContext) error {
 	if c.RunWhen != nil && !*c.RunWhen {
 		return nil
 	}

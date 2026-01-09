@@ -2,11 +2,9 @@ package validate
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/pipeline"
-	"github.com/kwizyHQ/irex/internal/diagnostics"
 	"github.com/spf13/cobra"
 )
 
@@ -35,8 +33,4 @@ func NewValidateCmd() *cobra.Command {
 		},
 	}
 	return cmd
-}
-
-func printDiagnostic(d diagnostics.Diagnostic) {
-	fmt.Fprintf(os.Stderr, "[%s] %s: %s\n", d.Severity, d.Source, d.Message)
 }

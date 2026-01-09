@@ -10,7 +10,7 @@ import (
 	nodets "github.com/kwizyHQ/irex/internal/engines/node-ts"
 	"github.com/kwizyHQ/irex/internal/ir"
 	"github.com/kwizyHQ/irex/internal/plan"
-	. "github.com/kwizyHQ/irex/internal/plan/steps"
+	steps "github.com/kwizyHQ/irex/internal/plan/steps"
 	"github.com/kwizyHQ/irex/internal/tempdir"
 	"github.com/kwizyHQ/irex/internal/watcher"
 	"github.com/spf13/cobra"
@@ -41,8 +41,8 @@ func Run() *cobra.Command {
 				ID:   "watch",
 				Name: "Watch server",
 				Steps: []plan.Step{
-					&LoadIR{IRPath: "irex.hcl"},
-					&PlanSelectorStep{
+					&steps.LoadIR{IRPath: "irex.hcl"},
+					&steps.PlanSelectorStep{
 						PlansMap: map[string]func(ctx *plan.PlanContext) *plan.Plan{
 							"node-ts": nodets.NodeTSWatchPlan,
 						},

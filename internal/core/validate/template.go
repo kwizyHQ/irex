@@ -1,11 +1,11 @@
 package validate
 
 import (
-	. "github.com/kwizyHQ/irex/internal/core/symbols"
+	"github.com/kwizyHQ/irex/internal/core/symbols"
 	"github.com/kwizyHQ/irex/internal/diagnostics"
 )
 
-func ValidateTemplates(def *TemplateDefinition) []Diagnostic {
+func ValidateTemplates(def *symbols.TemplateDefinition) []diagnostics.Diagnostic {
 	reporter := diagnostics.NewReporter()
 	zeroRange := diagnostics.Range{}
 	source := "template"

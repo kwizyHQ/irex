@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/kwizyHQ/irex/internal/core/ast"
-	. "github.com/kwizyHQ/irex/internal/core/symbols"
+	"github.com/kwizyHQ/irex/internal/core/symbols"
 	"github.com/kwizyHQ/irex/internal/core/validate"
 	"github.com/kwizyHQ/irex/internal/diagnostics"
 )
@@ -13,7 +13,7 @@ type TemplateOptions struct {
 	Path string
 }
 
-type TemplateInfo = TemplateBlock
+type TemplateInfo = symbols.TemplateBlock
 
 type TemplateRegistry struct {
 	Templates []TemplateInfo
@@ -24,7 +24,7 @@ func BuildTemplate(opts TemplateOptions) (TemplateRegistry, error) {
 
 	// ---------------- Parse Template AST ----------------
 	// scan the opts
-	var templateDef TemplateDefinition
+	var templateDef symbols.TemplateDefinition
 	var registry TemplateRegistry
 	r.Extend(
 		ast.ParseHCL(opts.Path, &templateDef).(diagnostics.Diagnostics),

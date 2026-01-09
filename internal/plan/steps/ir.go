@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/pipeline"
-	. "github.com/kwizyHQ/irex/internal/plan"
+	"github.com/kwizyHQ/irex/internal/plan"
 )
 
 type LoadIR struct {
@@ -23,7 +23,7 @@ func (s *LoadIR) Description() string {
 	return "Loads the Intermediate Representation (IR) from the specified path to the Plan Context. default path is 'irex.hcl'."
 }
 
-func (s *LoadIR) Run(ctx *PlanContext) error {
+func (s *LoadIR) Run(ctx *plan.PlanContext) error {
 	irBundle, err := pipeline.Build(pipeline.BuildOptions{
 		ConfigPath: filepath.Join(ctx.TargetDir, s.IRPath),
 	})

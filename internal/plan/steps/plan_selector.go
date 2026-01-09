@@ -3,15 +3,15 @@ package plan
 import (
 	"log/slog"
 
-	. "github.com/kwizyHQ/irex/internal/plan"
+	"github.com/kwizyHQ/irex/internal/plan"
 )
 
-type plansMap = map[string]func(ctx *PlanContext) *Plan
+type plansMap = map[string]func(ctx *plan.PlanContext) *plan.Plan
 
 type PlanSelectorStep struct {
 	PlansMap        plansMap
 	Key             string
-	DeferLoadingKey func(ctx *PlanContext) string // get function to get delayed value for specified key in context
+	DeferLoadingKey func(ctx *plan.PlanContext) string // get function to get delayed value for specified key in context
 }
 
 func (s *PlanSelectorStep) ID() string {
@@ -26,7 +26,7 @@ func (s *PlanSelectorStep) Description() string {
 	return "Selects the appropriate plan based on the key of map."
 }
 
-func (s *PlanSelectorStep) Run(ctx *PlanContext) error {
+func (s *PlanSelectorStep) Run(ctx *plan.PlanContext) error {
 	// Example selection logic; in practice, this would be more complex
 	var planKey string
 	if s.Key != "" {
