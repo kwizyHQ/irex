@@ -54,7 +54,7 @@ func Run() *cobra.Command {
 			}
 
 			// 🔹 1. Initial execution
-			slog.Info("Initial build")
+			slog.Debug("Initial build")
 			if err := watchPlan.Execute(&planCtx); err != nil {
 				slog.Error("initial build failed", "err", err)
 				os.Exit(1)
@@ -68,9 +68,9 @@ func Run() *cobra.Command {
 				},
 				300*time.Millisecond,
 				func(ctx context.Context, events []watcher.Event) error {
-					slog.Info("Change detected, rebuilding", "events", len(events))
+					slog.Debug("Change detected, rebuilding", "events", len(events))
 					for _, ev := range events {
-						slog.Info(" - "+ev.Path, "type", ev.Type)
+						slog.Debug(" - "+ev.Path, "type", ev.Type)
 					}
 					// IMPORTANT: reuse same PlanContext
 					// Later you can diff IR / runtime here

@@ -40,6 +40,15 @@ func (t *TempDir) Delete() error {
 	return os.RemoveAll(t.path)
 }
 
+// Read a file from the temp directory.
+func (t *TempDir) ReadFile(relPath string) (string, error) {
+	data, err := os.ReadFile(filepath.Join(t.path, relPath))
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
 // Clean specfied directory inside the temp directory. Deletes all contents.
 func (t *TempDir) Clean(relPath string) error {
 	fullPath := filepath.Join(t.path, relPath)

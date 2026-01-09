@@ -32,8 +32,19 @@ func main() {
 		println("No env file found")
 	}
 	// set logger defaults
+	var level slog.Level
+	switch os.Getenv("IREX_LOG_LEVEL") {
+	case "DEBUG", "debug":
+		level = slog.LevelDebug
+	case "WARN", "warn":
+		level = slog.LevelWarn
+	case "ERROR", "error":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
+	}
 	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
+		Level: level,
 	})
 	logger := slog.New(&elapsedHandler{Handler: handler})
 	// logger := slog.New(handler)

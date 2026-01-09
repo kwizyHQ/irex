@@ -1,8 +1,6 @@
 package pipeline
 
 import (
-	"os"
-
 	"github.com/kwizyHQ/irex/internal/core/ast"
 	"github.com/kwizyHQ/irex/internal/core/symbols"
 	"github.com/kwizyHQ/irex/internal/core/validate"
@@ -19,13 +17,13 @@ type TemplateRegistry struct {
 	Templates []TemplateInfo
 }
 
-func BuildTemplate(opts TemplateOptions) (TemplateRegistry, error) {
+func BuildTemplate(opts TemplateOptions) (*TemplateRegistry, error) {
 	r := diagnostics.NewReporter()
 
 	// ---------------- Parse Template AST ----------------
 	// scan the opts
 	var templateDef symbols.TemplateDefinition
-	var registry TemplateRegistry
+
 	r.Extend(
 		ast.ParseHCL(opts.Path, &templateDef).(diagnostics.Diagnostics),
 	)
@@ -37,11 +35,12 @@ func BuildTemplate(opts TemplateOptions) (TemplateRegistry, error) {
 	)
 
 	if r.HasErrors() {
-		os.Exit(1)
+		return nil, r.Err()
 	}
 
 	// map to registry
-	registry.Templates = templateDef.Templates
+	Templates := templateDef.Templates
 
-	return registry, r.All()
+	return &TemplateRegistry{Templates: Templates}, nil
+
 }
