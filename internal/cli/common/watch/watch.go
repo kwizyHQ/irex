@@ -11,6 +11,7 @@ import (
 	"github.com/kwizyHQ/irex/internal/ir"
 	"github.com/kwizyHQ/irex/internal/plan"
 	. "github.com/kwizyHQ/irex/internal/plan/steps"
+	"github.com/kwizyHQ/irex/internal/tempdir"
 	"github.com/kwizyHQ/irex/internal/watcher"
 	"github.com/spf13/cobra"
 )
@@ -86,6 +87,9 @@ func Run() *cobra.Command {
 
 			slog.Info("Watcher running")
 			<-ctx.Done()
+			// Cleanup on exit
+			slog.Info("Shutting down watcher")
+			tempdir.Get().Delete()
 		},
 	}
 

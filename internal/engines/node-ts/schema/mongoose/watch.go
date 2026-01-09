@@ -20,7 +20,7 @@ func MongooseTSWatchPlan(ctx *PlanContext) *Plan {
 			&CompileTemplatesStep{
 				Fs:            fsub,
 				FrameworkType: FrameworkTypeSchema,
-				FrameworkName: "mongoose2",
+				FrameworkName: "mongoose",
 			},
 		},
 	}
