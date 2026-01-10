@@ -1,7 +1,19 @@
 package plan
 
 import (
+	"text/template"
+
+	"github.com/kwizyHQ/irex/internal/core/pipeline"
 	"github.com/kwizyHQ/irex/internal/ir"
+	"github.com/kwizyHQ/irex/internal/tempdir"
+)
+
+type TemplateType string
+
+const (
+	TemplateTypeService TemplateType = "service"
+	TemplateTypeSchema  TemplateType = "schema"
+	TemplateTypeRuntime TemplateType = "runtime"
 )
 
 type Logger interface {
@@ -11,11 +23,32 @@ type Logger interface {
 	Debug(msg string)
 }
 
+type TemplateDefinition = pipeline.TemplateInfo
+
+type TemplateBundle struct {
+	Templates []pipeline.TemplateInfo
+	Root      *template.Template
+}
+
+type RenderedTemplate struct {
+	Name       string
+	OutputPath string
+	Content    []byte
+}
+
+type RenderSession struct {
+	Files []RenderedTemplate
+}
+
+type CompiledTemplates map[TemplateType]TemplateBundle
+
 type PlanContext struct {
-	TargetDir   string
-	ProjectName string
-	IR          *ir.IRBundle
-	// Logger      Logger
+	TargetDir         string
+	ProjectName       string
+	IR                *ir.IRBundle
+	CompiledTemplates CompiledTemplates
+	RenderSession     *RenderSession
+	TmpDir            *tempdir.TempDir
 }
 
 type Plan struct {

@@ -31,10 +31,13 @@ func Run() *cobra.Command {
 			* Watch for file changes and re-compile as needed
 			 */
 			// let's first implement a normal build command before watch (using plan)
-
+			dir := tempdir.Get()
 			planCtx := plan.PlanContext{
-				TargetDir: ".",
-				IR:        &ir.IRBundle{},
+				TargetDir:         ".",
+				IR:                &ir.IRBundle{},
+				TmpDir:            dir,
+				CompiledTemplates: make(plan.CompiledTemplates),
+				RenderSession:     &plan.RenderSession{},
 			}
 
 			watchPlan := &plan.Plan{
@@ -89,7 +92,7 @@ func Run() *cobra.Command {
 			<-ctx.Done()
 			// Cleanup on exit
 			slog.Info("Shutting down watcher")
-			tempdir.Get().Delete()
+			dir.Delete()
 		},
 	}
 
