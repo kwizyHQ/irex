@@ -77,6 +77,14 @@ func NodeTsScaffold(ctx *plan.PlanContext) *plan.Plan {
 					"src/workflows",
 				},
 			},
+			&steps.CreateFoldersStep{
+				Folders: []string{
+					"spec",
+					"spec/schema",
+					"spec/service",
+					"spec/templates",
+				},
+			},
 			&steps.CopyFilesStep{
 				FS: subFS,
 				FilesCopy: map[string]string{
@@ -85,6 +93,8 @@ func NodeTsScaffold(ctx *plan.PlanContext) *plan.Plan {
 					"scaffold/README.md":    "README.md",
 					"scaffold/.env.example": ".env.example",
 					"scaffold/nodemon.json": "nodemon.json",
+					"scaffold/service.hcl":  "spec/service/service.hcl",
+					"scaffold/schema.hcl":   "spec/schema/schema.hcl",
 				},
 			},
 			&steps.CommandStep{

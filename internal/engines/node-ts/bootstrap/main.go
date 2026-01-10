@@ -16,57 +16,73 @@ func createHCLFile(name, target, pm string, useNodemon bool) error {
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
 
-	cfg := rootBody.AppendNewBlock("config", nil)
-	cfgBody := cfg.Body()
-	cfgBody.SetAttributeValue("name", cty.StringVal(name))
-	cfgBody.SetAttributeValue("description", cty.StringVal("Intermediate Representation Specification"))
-	cfgBody.SetAttributeValue("version", cty.StringVal("1.0.0"))
+	// project block
+	project := rootBody.AppendNewBlock("project", nil)
+	projectBody := project.Body()
 
-	gen := cfgBody.AppendNewBlock("generate", nil)
-	genBody := gen.Body()
-	genBody.SetAttributeValue("schema", cty.BoolVal(true))
-	genBody.SetAttributeValue("service", cty.BoolVal(true))
-	genBody.SetAttributeValue("output_root", cty.StringVal("./myapp"))
-	genBody.SetAttributeValue("force_overwrite", cty.BoolVal(false))
-	genBody.SetAttributeValue("verbose", cty.BoolVal(false))
+	// Metadata
+	projectBody.SetAttributeValue("name", cty.StringVal(name))
+	projectBody.SetAttributeValue("description", cty.StringVal("Intermediate Representation Specification"))
+	projectBody.SetAttributeValue("version", cty.StringVal("1.0.0"))
+	projectBody.SetAttributeValue("author", cty.StringVal("IRS Team"))
+	projectBody.SetAttributeValue("license", cty.StringVal("MIT"))
+	projectBody.SetAttributeValue("timezone", cty.StringVal("UTC"))
 
-	rt := cfgBody.AppendNewBlock("runtime", nil)
-	rtBody := rt.Body()
-	rtBody.SetAttributeValue("name", cty.StringVal("node-ts"))
-	rtBody.SetAttributeValue("scaffold", cty.BoolVal(true))
-	rtBody.SetAttributeValue("output_dir", cty.StringVal("."))
-	opts := rtBody.AppendNewBlock("options", nil)
-	opts.Body().SetAttributeValue("package_manager", cty.StringVal(pm))
-	opts.Body().SetAttributeValue("entry", cty.StringVal("src/app.ts"))
-	opts.Body().SetAttributeValue("dev_nodemon", cty.BoolVal(useNodemon))
+	// paths block
+	paths := projectBody.AppendNewBlock("paths", nil)
+	pathsBody := paths.Body()
+	pathsBody.SetAttributeValue("specifications", cty.StringVal("./spec"))
+	pathsBody.SetAttributeValue("templates", cty.StringVal("./spec/templates"))
+	pathsBody.SetAttributeValue("output", cty.StringVal("./src/generated"))
 
-	mods := cfgBody.AppendNewBlock("modules", nil)
-	modsBody := mods.Body()
+	// generator block
+	generator := projectBody.AppendNewBlock("generator", nil)
+	generatorBody := generator.Body()
+	generatorBody.SetAttributeValue("schema", cty.BoolVal(true))
+	generatorBody.SetAttributeValue("service", cty.BoolVal(true))
+	generatorBody.SetAttributeValue("dry_run", cty.BoolVal(false))
+	generatorBody.SetAttributeValue("clean_before", cty.BoolVal(true))
 
-	schema := modsBody.AppendNewBlock("schema", nil)
-	schemaBody := schema.Body()
-	schemaBody.SetAttributeValue("framework", cty.StringVal("mongoose"))
-	schemaBody.SetAttributeValue("output_dir", cty.StringVal("vendor/models"))
-	schOpts := schemaBody.AppendNewBlock("options", nil)
-	schOpts.Body().SetAttributeValue("uri", cty.StringVal("${env.MONGO_URI}"))
-	schOpts.Body().SetAttributeValue("db", cty.StringVal("${env.MONGO_DB}"))
+	// runtime block
+	runtime := projectBody.AppendNewBlock("runtime", nil)
+	runtimeBody := runtime.Body()
+	runtimeBody.SetAttributeValue("name", cty.StringVal("node-ts"))
+	runtimeBody.SetAttributeValue("scaffold", cty.BoolVal(true))
+	runtimeBody.SetAttributeValue("version", cty.StringVal("18.0.0"))
 
-	service := modsBody.AppendNewBlock("service", nil)
-	serviceBody := service.Body()
-	serviceBody.SetAttributeValue("framework", cty.StringVal("fastify"))
-	serviceBody.SetAttributeValue("output_dir", cty.StringVal("src/routes"))
-	svcOpts := serviceBody.AppendNewBlock("options", nil)
-	svcOpts.Body().SetAttributeValue("logger", cty.BoolVal(true))
-	svcOpts.Body().SetAttributeValue("port", cty.NumberIntVal(8080))
-	svcOpts.Body().SetAttributeValue("host", cty.StringVal("localhost"))
+	// runtime.options block
+	rtOpts := runtimeBody.AppendNewBlock("options", nil)
+	rtOptsBody := rtOpts.Body()
+	rtOptsBody.SetAttributeValue("package_manager", cty.StringVal(pm))
+	rtOptsBody.SetAttributeValue("entry", cty.StringVal("src/app.ts"))
+	rtOptsBody.SetAttributeValue("dev_nodemon", cty.BoolVal(useNodemon))
 
-	env := cfgBody.AppendNewBlock("env", nil)
-	env.Body().SetAttributeValue("file", cty.StringVal("./.env"))
-	env.Body().SetAttributeValue("require", cty.BoolVal(false))
+	// runtime.schema block
+	rtSchema := runtimeBody.AppendNewBlock("schema", nil)
+	rtSchemaBody := rtSchema.Body()
+	rtSchemaBody.SetAttributeValue("framework", cty.StringVal("mongoose"))
+	rtSchemaBody.SetAttributeValue("version", cty.StringVal("6.0.0"))
+	rtSchemaOpts := rtSchemaBody.AppendNewBlock("options", nil)
+	rtSchemaOptsBody := rtSchemaOpts.Body()
+	rtSchemaOptsBody.SetAttributeRaw("uri", hclwrite.TokensForFunctionCall("env", hclwrite.TokensForValue(cty.StringVal("MONGO_URI"))))
+	rtSchemaOptsBody.SetAttributeRaw("db", hclwrite.TokensForFunctionCall("env", hclwrite.TokensForValue(cty.StringVal("MONGO_DB"))))
 
-	meta := cfgBody.AppendNewBlock("meta", nil)
-	meta.Body().SetAttributeValue("created_at", cty.StringVal(time.Now().Format("2006-01-02")))
-	meta.Body().SetAttributeValue("generator_version", cty.StringVal("0.1.0"))
+	// runtime.service block
+	rtService := runtimeBody.AppendNewBlock("service", nil)
+	rtServiceBody := rtService.Body()
+	rtServiceBody.SetAttributeValue("framework", cty.StringVal("fastify"))
+	rtServiceBody.SetAttributeValue("version", cty.StringVal("4.0.0"))
+	rtServiceOpts := rtServiceBody.AppendNewBlock("options", nil)
+	rtServiceOptsBody := rtServiceOpts.Body()
+	rtServiceOptsBody.SetAttributeValue("logger", cty.BoolVal(true))
+	rtServiceOptsBody.SetAttributeValue("port", cty.NumberIntVal(8080))
+	rtServiceOptsBody.SetAttributeValue("host", cty.StringVal("localhost"))
+
+	// meta block
+	meta := projectBody.AppendNewBlock("meta", nil)
+	metaBody := meta.Body()
+	metaBody.SetAttributeValue("created_at", cty.StringVal(time.Now().Format("2006-01-02")))
+	metaBody.SetAttributeValue("generator_version", cty.StringVal("0.1.0"))
 
 	outPath := filepath.Join(target, "irex.hcl")
 	fmt.Printf("generating %s...\n", outPath)
@@ -114,9 +130,11 @@ func Run() *cobra.Command {
 			if target == "." {
 				entries, err := os.ReadDir(target)
 				if err != nil {
-					return fmt.Errorf("failed to read current directory: %w", err)
+					if !(len(entries) == 1 && entries[0].Name() == ".env") {
+						return fmt.Errorf("failed to read current directory: %w", err)
+					}
 				}
-				if len(entries) > 0 {
+				if len(entries) > 1 {
 					return fmt.Errorf("current directory must be empty")
 				}
 			} else if _, err := os.Stat(target); err == nil {

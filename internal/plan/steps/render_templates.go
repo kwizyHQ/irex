@@ -1,4 +1,4 @@
-package plan
+package steps
 
 import (
 	"bytes"

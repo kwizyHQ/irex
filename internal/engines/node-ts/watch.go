@@ -3,7 +3,7 @@ package nodets
 import (
 	"github.com/kwizyHQ/irex/internal/engines/node-ts/schema/mongoose"
 	"github.com/kwizyHQ/irex/internal/plan"
-	steps "github.com/kwizyHQ/irex/internal/plan/steps"
+	"github.com/kwizyHQ/irex/internal/plan/steps"
 )
 
 func NodeTSWatchPlan(ctx *plan.PlanContext) *plan.Plan {
@@ -24,6 +24,9 @@ func NodeTSWatchPlan(ctx *plan.PlanContext) *plan.Plan {
 					// "fastify": FastifyWatchPlan,
 				},
 				Key: ctx.IR.Config.Runtime.Service.Framework,
+			},
+			&steps.FlushRendersStep{
+				DestDir: ".",
 			},
 		},
 	}
