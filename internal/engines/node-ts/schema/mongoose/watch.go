@@ -29,8 +29,9 @@ func (p *ModelDataProvider) DataKey() string {
 func (p *ModelDataProvider) Resolve(ctx *plan.PlanContext) (any, steps.Cardinality) {
 	// get model values from Models
 	models := make([]any, 0)
-	for _, model := range ctx.IR.Models {
-		models = append(models, model)
+
+	for _, m := range ctx.IR.Models {
+		models = append(models, BuildMongoModel(m))
 	}
 	return models, steps.Many
 }
@@ -45,6 +46,7 @@ func MongooseTSWatchPlan(ctx *plan.PlanContext) *plan.Plan {
 				Fs:            fsub,
 				FrameworkType: plan.TemplateTypeSchema,
 				FrameworkName: "mongoose",
+				TemplateFuncs: TemplateFunctionsMap(),
 			},
 			&steps.RenderTemplatesStep{
 				TemplateType: plan.TemplateTypeSchema,
