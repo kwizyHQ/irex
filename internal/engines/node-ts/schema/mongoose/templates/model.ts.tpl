@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const {{ .Name }}Schema = new mongoose.Schema({
+export const {{ .Name }}Schema = new mongoose.Schema({
 {{- range .Fields }}
   {{ .Name }}: {
     {{- if .IsArray }}

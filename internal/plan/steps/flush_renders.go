@@ -32,7 +32,7 @@ func (s *FlushRendersStep) Run(ctx *plan.PlanContext) error {
 	}
 	for _, render := range ctx.RenderSession.Files {
 		slog.Info("Writing rendered file", "path", render.OutputPath)
-		fullPath := filepath.Join(s.DestDir, render.OutputPath)
+		fullPath := filepath.Join(s.DestDir, ctx.IR.Config.Paths.Output, render.OutputPath)
 		if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
 			return fmt.Errorf("failed to create directories for %s: %w", fullPath, err)
 		}

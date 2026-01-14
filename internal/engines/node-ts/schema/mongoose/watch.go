@@ -18,7 +18,8 @@ func (p *IndexDataProvider) DataKey() string {
 }
 
 func (p *IndexDataProvider) Resolve(ctx *plan.PlanContext) (any, steps.Cardinality) {
-	return ctx.IR, steps.Single
+	indexData := BuildIndexDataLayer(ctx.IR)
+	return indexData, steps.Single
 }
 
 type ModelDataProvider struct{}
