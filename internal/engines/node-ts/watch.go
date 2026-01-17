@@ -2,6 +2,7 @@ package nodets
 
 import (
 	"github.com/kwizyHQ/irex/internal/engines/node-ts/schema/mongoose"
+	"github.com/kwizyHQ/irex/internal/engines/node-ts/service/fastify"
 	"github.com/kwizyHQ/irex/internal/plan"
 	"github.com/kwizyHQ/irex/internal/plan/steps"
 )
@@ -21,7 +22,7 @@ func NodeTSWatchPlan(ctx *plan.PlanContext) *plan.Plan {
 			// let's select the service framework here
 			&steps.PlanSelectorStep{
 				PlansMap: map[string]func(ctx *plan.PlanContext) *plan.Plan{
-					// "fastify": FastifyWatchPlan,
+					"fastify": fastify.FastifyTSWatchPlan,
 				},
 				Key: ctx.IR.Config.Runtime.Service.Framework,
 			},

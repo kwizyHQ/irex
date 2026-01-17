@@ -104,15 +104,45 @@ func (s *CompileTemplatesStep) mergeFuncs() template.FuncMap {
 func (s *CompileTemplatesStep) parseTemplates(dir string, templates []pipeline.TemplateInfo) (*template.Template, error) {
 	tmpl := template.New("root").Funcs(s.mergeFuncs())
 
-	for _, t := range templates {
-		fullPath := filepath.Join(dir, t.Name)
-		// ParseFiles adds the file to the existing template set
-		if _, err := tmpl.ParseFiles(fullPath); err != nil {
-			return nil, err
+	// recursively parse .tpl files from dir
+	var recursiveParseFunc func(string) error
+	recursiveParseFunc = func(currentDir string) error {
+		entries, err := os.ReadDir(currentDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil
+			}
+			return err
 		}
-		if _, err := tmpl.New("output_path:" + t.Name).Parse(t.Output); err != nil {
+		for _, entry := range entries {
+			fullPath := filepath.Join(currentDir, entry.Name())
+			if entry.IsDir() {
+				if err := recursiveParseFunc(fullPath); err != nil {
+					return err
+				}
+			} else if strings.HasSuffix(entry.Name(), ".tpl") {
+				if _, err := tmpl.ParseFiles(fullPath); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+
+	if err := recursiveParseFunc(dir); err != nil {
+		return nil, err
+	}
+
+	// register any template outputs defined in the HCL templates list
+	for _, t := range templates {
+		if t.Output == "" {
+			continue
+		}
+		name := "output_path:" + t.Name
+		if _, err := tmpl.New(name).Parse(t.Output); err != nil {
 			return nil, err
 		}
 	}
+
 	return tmpl, nil
 }

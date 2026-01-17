@@ -1,39 +1,71 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+	"context"
+	"log/slog"
 	"os"
+	"time"
 
+	"github.com/dotenv-org/godotenvvault"
+	formatCmd "github.com/kwizyHQ/irex/internal/cli/common/format"
 	initcmd "github.com/kwizyHQ/irex/internal/cli/common/init"
+	validateCmd "github.com/kwizyHQ/irex/internal/cli/common/validate"
+	"github.com/kwizyHQ/irex/internal/cli/common/watch"
+	"github.com/spf13/cobra"
 )
 
-func usage() {
-	fmt.Println("Usage: irex <command> [options]")
-	fmt.Println("Commands:")
-	fmt.Println("  init    Initialize a new project (interactive)")
-	fmt.Println("  build   Build generated project (placeholder)")
+var startTime = time.Now()
+
+type elapsedHandler struct{ slog.Handler }
+
+func (h elapsedHandler) Handle(ctx context.Context, r slog.Record) error {
+	r.AddAttrs(
+		slog.String("elapsed", time.Since(startTime).Round(time.Millisecond).String()),
+	)
+	return h.Handler.Handle(ctx, r)
 }
 
 func main() {
-	flag.Parse()
-	args := flag.Args()
-	if len(args) == 0 {
-		usage()
-		os.Exit(1)
+
+	err := godotenvvault.Load()
+	if err != nil {
+		println("No env file found")
+	}
+	// set logger defaults
+	var level slog.Level
+	switch os.Getenv("IREX_LOG_LEVEL") {
+	case "DEBUG", "debug":
+		level = slog.LevelDebug
+	case "WARN", "warn":
+		level = slog.LevelWarn
+	case "ERROR", "error":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
+	}
+	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: level,
+	})
+	logger := slog.New(&elapsedHandler{Handler: handler})
+	// logger := slog.New(handler)
+	slog.SetDefault(logger)
+
+	var rootCmd = &cobra.Command{
+		Use:   "irex",
+		Short: "IREX development CLI",
+		Long:  `IREX development CLI for initializing and managing dev projects.`,
 	}
 
-	switch args[0] {
-	case "init":
-		if err := initcmd.Run(); err != nil {
-			fmt.Fprintln(os.Stderr, "error:", err)
-			os.Exit(1)
-		}
-	case "build":
-		fmt.Println("build command not implemented yet")
-		os.Exit(0)
-	default:
-		usage()
+	initCmd := initcmd.Run()
+	watchCmd := watch.Run()
+
+	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(watchCmd)
+	rootCmd.AddCommand(formatCmd.Run())
+	rootCmd.AddCommand(validateCmd.NewValidateCmd())
+
+	if err := rootCmd.Execute(); err != nil {
+		slog.Error(err.Error())
 		os.Exit(1)
 	}
 }

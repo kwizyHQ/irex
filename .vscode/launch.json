@@ -8,7 +8,7 @@
             "name": "Debug: irexd validate",
             "type": "go",
             "request": "launch",
-            "program": "${workspaceFolder}/cmd/irex-dev",
+            "program": "${workspaceFolder}/cmd/irex",
             "args": ["validate", "./temp/fastify-mongoose.hcl"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
@@ -17,7 +17,7 @@
             "name": "Debug: irexd scaffold",
             "type": "go",
             "request": "launch",
-            "program": "${workspaceFolder}/cmd/irex-dev",
+            "program": "${workspaceFolder}/cmd/irex",
             "args": ["init", "node-ts"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
@@ -26,7 +26,7 @@
             "name": "Debug: irexd watch",
             "type": "go",
             "request": "launch",
-            "program": "${workspaceFolder}/cmd/irex-dev",
+            "program": "${workspaceFolder}/cmd/irex",
             "args": ["watch"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"

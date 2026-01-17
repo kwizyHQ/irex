@@ -1,0 +1,12 @@
+{
+	"servers": {
+		"go-mcp-server-16bd7b06": {
+			"type": "stdio",
+			"command": "gopls",
+			"args": [
+				"mcp"
+			]
+		}
+	},
+	"inputs": []
+}
