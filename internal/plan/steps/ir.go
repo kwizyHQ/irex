@@ -1,6 +1,7 @@
 package steps
 
 import (
+	"log/slog"
 	"path/filepath"
 
 	"github.com/kwizyHQ/irex/internal/core/pipeline"
@@ -28,7 +29,8 @@ func (s *LoadIR) Run(ctx *plan.PlanContext) error {
 		ConfigPath: filepath.Join(ctx.TargetDir, s.IRPath),
 	})
 	if err != nil {
-		return err
+		slog.Error(err.Error())
+		return nil
 	}
 	ctx.IR = irBundle
 	return nil

@@ -8,17 +8,21 @@ func FromHCL(
 	errs error,
 ) []Diagnostic {
 	var diags hcl.Diagnostics
-	// check if errs is nil (hence no diagnostics)
 	if errs == nil {
 		return nil
 	}
 
-	// now check if errs is iterable then convert to array
-	if _, ok := errs.(hcl.Diagnostics); !ok {
-		// not iterable, return single diagnostic
-		diags.Append(errs.(*hcl.Diagnostic))
-	} else {
-		diags = errs.(hcl.Diagnostics)
+	switch v := errs.(type) {
+	case hcl.Diagnostics:
+		diags = v
+	case *hcl.Diagnostic:
+		diags = hcl.Diagnostics{v}
+	default:
+		// unknown error type: return a single diagnostic with the error message
+		return []Diagnostic{{
+			Severity: SeverityError,
+			Message:  errs.Error(),
+		}}
 	}
 
 	if len(diags) == 0 {
@@ -33,23 +37,46 @@ func FromHCL(
 			sev = SeverityWarning
 		}
 
-		out = append(out, Diagnostic{
+		diag := Diagnostic{
 			Severity: sev,
 			Message:  d.Summary,
-			Range: Range{
-				Start: Position{
+		}
+
+		// populate Source and location information if available
+		if d.Subject != nil {
+			diag.Source = d.Subject.Filename
+			diag.Range = Range{}
+			// guard Subject.Start/End (hcl.Pos has Line/Column/Byte)
+			if d.Subject.Start.Line != 0 || d.Subject.Start.Column != 0 || d.Subject.Start.Byte != 0 {
+				diag.Range.Start = Position{
 					Line:   d.Subject.Start.Line,
 					Column: d.Subject.Start.Column,
 					Byte:   d.Subject.Start.Byte,
-				},
-				End: Position{
+				}
+				diag.Location = &Location{
+					Filename:  d.Subject.Filename,
+					StartByte: d.Subject.Start.Byte,
+				}
+			}
+			if d.Subject.End.Line != 0 || d.Subject.End.Column != 0 || d.Subject.End.Byte != 0 {
+				diag.Range.End = Position{
 					Line:   d.Subject.End.Line,
 					Column: d.Subject.End.Column,
 					Byte:   d.Subject.End.Byte,
-				},
-			},
-			Source: d.Subject.Filename,
-		})
+				}
+				if diag.Location == nil {
+					diag.Location = &Location{Filename: d.Subject.Filename}
+				}
+				diag.Location.EndByte = d.Subject.End.Byte
+				// set Start/End positions on Location
+				if diag.Location.Start == nil {
+					diag.Location.Start = &Position{Line: d.Subject.Start.Line, Column: d.Subject.Start.Column, Byte: d.Subject.Start.Byte}
+				}
+				diag.Location.End = &Position{Line: d.Subject.End.Line, Column: d.Subject.End.Column, Byte: d.Subject.End.Byte}
+			}
+		}
+
+		out = append(out, diag)
 	}
 
 	return out

@@ -1,10 +1,15 @@
 package diagnostics
 
-import "strings"
+import (
+	"strings"
+	"sync"
+)
 
 // Reporter collects diagnostics from multiple pipeline stages.
-// It does NOT print or format anything.
+// It does NOT print or format anything. Reporter is safe for concurrent
+// use.
 type Reporter struct {
+	mu   sync.Mutex
 	list []Diagnostic
 }
 
@@ -15,18 +20,27 @@ func NewReporter() *Reporter {
 }
 
 func (r *Reporter) Add(d Diagnostic) {
+	r.mu.Lock()
 	r.list = append(r.list, d)
+	r.mu.Unlock()
 }
 
 func (r *Reporter) Extend(diags []Diagnostic) {
 	if len(diags) == 0 {
 		return
 	}
+	r.mu.Lock()
 	r.list = append(r.list, diags...)
+	r.mu.Unlock()
 }
 
 func (r *Reporter) All() Diagnostics {
-	return r.list
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	// return a copy to avoid races
+	out := make([]Diagnostic, len(r.list))
+	copy(out, r.list)
+	return out
 }
 
 func (dc Diagnostics) Error() string {
@@ -43,28 +57,15 @@ func (dc Diagnostics) Error() string {
 // Err returns an error representing diagnostics if there are any errors present.
 // Returns nil when no diagnostics with SeverityError are recorded.
 func (r *Reporter) Err() error {
-	if !r.HasErrors() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if !r.hasErrorsLocked() {
 		return nil
 	}
-	return diagnosticsError{diags: r.list}
+	return Diagnostics(r.list)
 }
 
-type diagnosticsError struct {
-	diags []Diagnostic
-}
-
-func (e diagnosticsError) Error() string {
-	if len(e.diags) == 0 {
-		return "diagnostics error"
-	}
-	parts := make([]string, 0, len(e.diags))
-	for _, d := range e.diags {
-		parts = append(parts, d.Message)
-	}
-	return strings.Join(parts, "; ")
-}
-
-func (r *Reporter) HasErrors() bool {
+func (r *Reporter) hasErrorsLocked() bool {
 	for _, d := range r.list {
 		if d.Severity == SeverityError {
 			return true
@@ -73,7 +74,15 @@ func (r *Reporter) HasErrors() bool {
 	return false
 }
 
+func (r *Reporter) HasErrors() bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.hasErrorsLocked()
+}
+
 func (r *Reporter) HasWarnings() bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	for _, d := range r.list {
 		if d.Severity == SeverityWarning {
 			return true
@@ -82,9 +91,9 @@ func (r *Reporter) HasWarnings() bool {
 	return false
 }
 
-func (r *Reporter) Error(message string, Range Range, code string, source string) {
+func (r *Reporter) Error(message string, rng Range, code string, source string) {
 	r.Add(Diagnostic{
-		Range:    Range,
+		Range:    rng,
 		Severity: SeverityError,
 		Message:  message,
 		Source:   source,
@@ -92,9 +101,9 @@ func (r *Reporter) Error(message string, Range Range, code string, source string
 	})
 }
 
-func (r *Reporter) Warn(message string, Range Range, code string, source string) {
+func (r *Reporter) Warn(message string, rng Range, code string, source string) {
 	r.Add(Diagnostic{
-		Range:    Range,
+		Range:    rng,
 		Severity: SeverityWarning,
 		Message:  message,
 		Source:   source,
@@ -102,9 +111,9 @@ func (r *Reporter) Warn(message string, Range Range, code string, source string)
 	})
 }
 
-func (r *Reporter) Info(message string, Range Range, code string, source string) {
+func (r *Reporter) Info(message string, rng Range, code string, source string) {
 	r.Add(Diagnostic{
-		Range:    Range,
+		Range:    rng,
 		Severity: SeverityInformation,
 		Message:  message,
 		Source:   source,
@@ -112,9 +121,9 @@ func (r *Reporter) Info(message string, Range Range, code string, source string)
 	})
 }
 
-func (r *Reporter) Hint(message string, Range Range, code string, source string) {
+func (r *Reporter) Hint(message string, rng Range, code string, source string) {
 	r.Add(Diagnostic{
-		Range:    Range,
+		Range:    rng,
 		Severity: SeverityHint,
 		Message:  message,
 		Source:   source,
