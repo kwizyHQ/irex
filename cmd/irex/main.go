@@ -11,6 +11,7 @@ import (
 	initcmd "github.com/kwizyHQ/irex/internal/cli/common/init"
 	validateCmd "github.com/kwizyHQ/irex/internal/cli/common/validate"
 	"github.com/kwizyHQ/irex/internal/cli/common/watch"
+	"github.com/kwizyHQ/irex/lsp"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +30,7 @@ func main() {
 
 	err := godotenvvault.Load()
 	if err != nil {
-		println("No env file found")
+		// println("No env file found")
 	}
 	// set logger defaults
 	var level slog.Level
@@ -63,6 +64,7 @@ func main() {
 	rootCmd.AddCommand(watchCmd)
 	rootCmd.AddCommand(formatCmd.Run())
 	rootCmd.AddCommand(validateCmd.NewValidateCmd())
+	rootCmd.AddCommand(lsp.Run())
 
 	if err := rootCmd.Execute(); err != nil {
 		slog.Error(err.Error())
