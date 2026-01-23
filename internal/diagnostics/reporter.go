@@ -1,7 +1,6 @@
 package diagnostics
 
 import (
-	"strings"
 	"sync"
 )
 
@@ -43,41 +42,15 @@ func (r *Reporter) All() Diagnostics {
 	return out
 }
 
-func (dc Diagnostics) Error() string {
-	if len(dc) == 0 {
-		return "no diagnostics"
-	}
-	parts := make([]string, 0, len(dc))
-	for _, d := range dc {
-		parts = append(parts, d.Message)
-	}
-	return strings.Join(parts, "; ")
-}
-
-// Err returns an error representing diagnostics if there are any errors present.
-// Returns nil when no diagnostics with SeverityError are recorded.
-func (r *Reporter) Err() error {
+func (r *Reporter) HasErrors() bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if !r.hasErrorsLocked() {
-		return nil
-	}
-	return Diagnostics(r.list)
-}
-
-func (r *Reporter) hasErrorsLocked() bool {
 	for _, d := range r.list {
 		if d.Severity == SeverityError {
 			return true
 		}
 	}
 	return false
-}
-
-func (r *Reporter) HasErrors() bool {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return r.hasErrorsLocked()
 }
 
 func (r *Reporter) HasWarnings() bool {

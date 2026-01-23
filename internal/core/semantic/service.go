@@ -25,8 +25,8 @@ func CheckServiceSemantic(serviceAst *symbols.ServiceDefinition, schemaAst *symb
 	checkService = func(s symbols.Service) {
 		if s.Model != "" {
 			if _, ok := modelNames[s.Model]; !ok {
-				reporter.Add(diagnostics.New(zeroRange, diagnostics.SeverityError,
-					"Service '"+s.Name+"' references undefined model '"+s.Model+"'", source, "service.model.not_found"))
+				reporter.Error("Service '"+s.Name+"' references undefined model '"+s.Model+"'", zeroRange,
+					"service.model.not_found", source)
 			}
 		}
 		// Recurse into nested services

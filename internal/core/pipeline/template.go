@@ -25,7 +25,7 @@ func BuildTemplate(opts TemplateOptions) (*TemplateRegistry, error) {
 	var templateDef symbols.TemplateDefinition
 
 	r.Extend(
-		ast.ParseHCL(opts.Path, &templateDef).(diagnostics.Diagnostics),
+		ast.ParseHCL(opts.Path, &templateDef),
 	)
 
 	// validate the template AST
@@ -35,7 +35,7 @@ func BuildTemplate(opts TemplateOptions) (*TemplateRegistry, error) {
 	)
 
 	if r.HasErrors() {
-		return nil, r.Err()
+		return nil, r.All()
 	}
 
 	// map to registry

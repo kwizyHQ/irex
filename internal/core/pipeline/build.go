@@ -17,7 +17,7 @@ type BuildOptions struct {
 	ConfigPath string
 }
 
-func Build(opts BuildOptions) (*shared.IRBundle, error) {
+func Build(opts BuildOptions) (*shared.IRBundle, diagnostics.Diagnostics) {
 	r := diagnostics.NewReporter()
 	ctx := &shared.BuildContext{
 		ConfigAST: &shared.ConfigAST{},
@@ -31,14 +31,14 @@ func Build(opts BuildOptions) (*shared.IRBundle, error) {
 	}
 
 	// ------------------- Config AST Decode ----------------
-	r.Extend(ast.ParseHCL(opts.ConfigPath, ctx.ConfigAST).(diagnostics.Diagnostics))
+	r.Extend(ast.ParseHCL(opts.ConfigPath, ctx.ConfigAST))
 
 	r.Extend(
 		validate.ValidateConfig(ctx.ConfigAST),
 	)
 
 	if r.HasErrors() {
-		return nil, r.Err()
+		return nil, r.All()
 	}
 
 	// ---------------- Other AST Decode ----------------
@@ -49,7 +49,7 @@ func Build(opts BuildOptions) (*shared.IRBundle, error) {
 	for _, path := range files {
 		var spec symbols.ModelsSpec
 		// We assume ParseHCL now handles the pointer internally
-		if diags := ast.ParseHCL(path, &spec).(diagnostics.Diagnostics); diags.HasErrors() {
+		if diags := ast.ParseHCL(path, &spec); len(diags) > 0 {
 			schemaContainsError = true
 			r.Extend(diags)
 			continue
@@ -68,10 +68,10 @@ func Build(opts BuildOptions) (*shared.IRBundle, error) {
 	files, err := filepath.Glob(filepath.Join(servicesPath, "*.hcl"))
 	if err != nil || len(files) == 0 {
 		r.Error("Warning we couln't found any service files, please add some.", diagnostics.Range{}, "service.read_error", "pipeline")
-		return nil, r.Err()
+		return nil, r.All()
 	}
 	r.Extend(
-		ast.ParseHCL(files[0], ctx.ServicesAST).(diagnostics.Diagnostics),
+		ast.ParseHCL(files[0], ctx.ServicesAST),
 	)
 
 	// if reporter.HasErrors() {
@@ -135,5 +135,5 @@ func Build(opts BuildOptions) (*shared.IRBundle, error) {
 		r.Error("IR Build error: "+err.Error(), diagnostics.Range{}, "ir.build_error", "pipeline")
 	}
 
-	return ctx.IR, r.Err()
+	return ctx.IR, r.All()
 }

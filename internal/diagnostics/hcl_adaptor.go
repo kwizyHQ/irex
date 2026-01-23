@@ -53,10 +53,6 @@ func FromHCL(
 					Column: d.Subject.Start.Column,
 					Byte:   d.Subject.Start.Byte,
 				}
-				diag.Location = &Location{
-					Filename:  d.Subject.Filename,
-					StartByte: d.Subject.Start.Byte,
-				}
 			}
 			if d.Subject.End.Line != 0 || d.Subject.End.Column != 0 || d.Subject.End.Byte != 0 {
 				diag.Range.End = Position{
@@ -64,15 +60,6 @@ func FromHCL(
 					Column: d.Subject.End.Column,
 					Byte:   d.Subject.End.Byte,
 				}
-				if diag.Location == nil {
-					diag.Location = &Location{Filename: d.Subject.Filename}
-				}
-				diag.Location.EndByte = d.Subject.End.Byte
-				// set Start/End positions on Location
-				if diag.Location.Start == nil {
-					diag.Location.Start = &Position{Line: d.Subject.Start.Line, Column: d.Subject.Start.Column, Byte: d.Subject.Start.Byte}
-				}
-				diag.Location.End = &Position{Line: d.Subject.End.Line, Column: d.Subject.End.Column, Byte: d.Subject.End.Byte}
 			}
 		}
 
