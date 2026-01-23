@@ -28,7 +28,7 @@ func (s *LoadIR) Run(ctx *plan.PlanContext) error {
 	irBundle, err := pipeline.Build(pipeline.BuildOptions{
 		ConfigPath: filepath.Join(ctx.TargetDir, s.IRPath),
 	})
-	if err != nil {
+	if err.Error() != "no diagnostics" {
 		slog.Error(err.Error())
 		return nil
 	}

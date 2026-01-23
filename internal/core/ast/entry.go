@@ -10,7 +10,7 @@ import (
 	"github.com/kwizyHQ/irex/internal/utils"
 )
 
-func ParseHCL[T any](path string, def *T) error {
+func ParseHCL[T any](path string, def *T) diagnostics.Diagnostics {
 	r := diagnostics.NewReporter()
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		r.Error("We couldn't find the file at "+path, diagnostics.Range{}, "config.not_found", "pipeline")
@@ -25,8 +25,8 @@ func ParseHCL[T any](path string, def *T) error {
 }
 
 func ParseToJson[T any](path string, def *T) (string, error) {
-	err := ParseHCL(path, def).(diagnostics.Diagnostics)
-	if err.HasErrors() {
+	err := ParseHCL(path, def)
+	if len(err) > 0 {
 		return "", err
 	}
 	return utils.ToJSON(def)
