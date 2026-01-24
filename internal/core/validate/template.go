@@ -8,10 +8,9 @@ import (
 func ValidateTemplates(def *symbols.TemplateDefinition) []diagnostics.Diagnostic {
 	reporter := diagnostics.NewReporter()
 	zeroRange := diagnostics.Range{}
-	source := "template"
 
 	if def == nil {
-		reporter.Error("Missing template definition root block.", zeroRange, "template.root.missing", source)
+		reporter.Error("Missing template definition root block.", zeroRange, "irex.input.required", "template")
 		return reporter.All()
 	}
 
@@ -19,10 +18,10 @@ func ValidateTemplates(def *symbols.TemplateDefinition) []diagnostics.Diagnostic
 	templateNames := map[string]struct{}{}
 	for _, t := range def.Templates {
 		if t.Name == "" {
-			reporter.Error("Template missing name.", zeroRange, "template.name.required", source)
+			reporter.Error("Template missing name.", zeroRange, "irex.input.required", "template.name")
 		} else {
 			if _, exists := templateNames[t.Name]; exists {
-				reporter.Error("Duplicate template name: "+t.Name, zeroRange, "template.name.duplicate", source)
+				reporter.Error("Duplicate template name: "+t.Name, zeroRange, "irex.input.duplicate", "template.name")
 			} else {
 				templateNames[t.Name] = struct{}{}
 			}
@@ -32,15 +31,15 @@ func ValidateTemplates(def *symbols.TemplateDefinition) []diagnostics.Diagnostic
 	// check for mode validity (valid modes: "single", "per-item")
 	for _, t := range def.Templates {
 		if t.Mode != "" && t.Mode != "single" && t.Mode != "per-item" {
-			reporter.Error("Invalid template mode '"+t.Mode+"' for template '"+t.Name+"'. Valid modes are 'single' and 'per-item'.", zeroRange, "template.mode", source)
+			reporter.Error("Invalid template mode '"+t.Mode+"' for template '"+t.Name+"'. Valid modes are 'single' and 'per-item'.", zeroRange, "irex.input.invalid", "template.mode")
 		}
 		// check if data is set
 		if t.Data == "" {
-			reporter.Error("Template '"+t.Name+"' has no data defined.", zeroRange, "template.data.recommended", source)
+			reporter.Error("Template '"+t.Name+"' has no data defined.", zeroRange, "irex.input.recommended", "template.data")
 		}
 		// check if output is set
 		if t.Output == "" {
-			reporter.Error("Template '"+t.Name+"' has no output defined.", zeroRange, "template.output.recommended", source)
+			reporter.Error("Template '"+t.Name+"' has no output defined.", zeroRange, "irex.input.recommended", "template.output")
 		}
 	}
 

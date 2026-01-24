@@ -44,7 +44,7 @@ func FromHCL(
 
 		// populate Source and location information if available
 		if d.Subject != nil {
-			diag.Source = d.Subject.Filename
+			diag.Filename = d.Subject.Filename
 			diag.Range = Range{}
 			// guard Subject.Start/End (hcl.Pos has Line/Column/Byte)
 			if d.Subject.Start.Line != 0 || d.Subject.Start.Column != 0 || d.Subject.Start.Byte != 0 {
