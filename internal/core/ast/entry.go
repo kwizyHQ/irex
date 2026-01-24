@@ -40,3 +40,13 @@ func ToJSON(v any) (string, error) {
 	}
 	return string(b), nil
 }
+
+func ParseFromHCLContent[T any](path string, content string, def *T) diagnostics.Diagnostics {
+	r := diagnostics.NewReporter()
+	ctx := &hcl.EvalContext{
+		Functions: functions.ASTFunctions,
+	}
+	err := hclsimple.Decode(path, []byte(content), ctx, def)
+	r.FromHCL(err)
+	return r.All()
+}

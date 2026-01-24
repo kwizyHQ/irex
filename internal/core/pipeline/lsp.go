@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/kwizyHQ/irex/internal/core/ast"
@@ -17,17 +18,17 @@ func GetDiagnosticsForFile(filename string, content string) diagnostics.Diagnost
 	case "config":
 		configAST := &shared.ConfigAST{}
 		r.SetFilename(filename)
-		r.ExtendWithFilename(ast.ParseHCL(filename, configAST))
+		r.ExtendWithFilename(ast.ParseFromHCLContent(filename, content, configAST))
 		r.ExtendWithFilename(validate.ValidateConfig(configAST))
 	case "schema":
 		schemaAST := &shared.SchemaAST{}
 		r.SetFilename(filename)
-		r.ExtendWithFilename(ast.ParseHCL(filename, schemaAST))
+		r.ExtendWithFilename(ast.ParseFromHCLContent(filename, content, schemaAST))
 		r.ExtendWithFilename(validate.ValidateSchema(schemaAST))
 	case "service":
 		serviceAST := &shared.ServicesAST{}
 		r.SetFilename(filename)
-		r.ExtendWithFilename(ast.ParseHCL(filename, serviceAST))
+		r.ExtendWithFilename(ast.ParseFromHCLContent(filename, content, serviceAST))
 		r.ExtendWithFilename(validate.ValidateService(serviceAST))
 	}
 	// let's merge the ranges as well (if not zeroRange)
@@ -40,7 +41,24 @@ func GetDiagnosticsForFile(filename string, content string) diagnostics.Diagnost
 		if d.HclPath != "" {
 			var rng hcl.Range
 			if table.Attrs[d.HclPath] != nil {
-				rng = table.Attrs[d.HclPath].DefRange
+				rng = table.Attrs[d.HclPath].ExprRange
+			} else {
+				// if we have no Attr, then we should issue error to parent block e.g. for project.name attribute we should point to project block
+				// split the hclPath by dot and remove last segment
+				parts := strings.Split(d.HclPath, ".")
+				if len(parts) > 1 {
+					parentPath := ""
+					for _, p := range parts[:len(parts)-1] {
+						if parentPath == "" {
+							parentPath = p
+						} else {
+							parentPath += "." + p
+						}
+					}
+					if table.Blocks[parentPath] != nil {
+						rng = table.Blocks[parentPath].BodyRange
+					}
+				}
 			}
 			if table.Blocks[d.HclPath] != nil {
 				rng = table.Blocks[d.HclPath].BodyRange

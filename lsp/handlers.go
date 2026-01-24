@@ -67,6 +67,6 @@ func (h *Handler) validateAndPublish(ctx context.Context, conn *jsonrpc2.Conn, u
 	text := h.docs[uri]
 	h.mu.Unlock()
 
-	diags := computeDiagnostics(text)
+	diags := computeDiagnostics(text, uri)
 	_ = publishDiagnostics(ctx, conn, uri, diags)
 }
