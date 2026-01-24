@@ -19,15 +19,15 @@ type Diagnostic struct {
 	Range    Range    `json:"range"`
 	Severity Severity `json:"severity"`
 	Message  string   `json:"message"`
-	Source   string   `json:"source,omitempty"`
-	Code     string   `json:"code,omitempty"`
 	HclPath  string   `json:"hcl_path,omitempty"`
+	Filename string   `json:"filename,omitempty"`
+	Code     string   `json:"code,omitempty"`
 }
 
 type Diagnostics []Diagnostic
 
 func (d *Diagnostic) Error() string {
-	return fmt.Sprintf("%s: %s; %s", d.Source, d.Message, d.Code)
+	return fmt.Sprintf("%s: %s; %s", d.Filename, d.Message, d.Code)
 }
 
 // error implementation, so that sets of diagnostics can be returned via

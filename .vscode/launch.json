@@ -30,6 +30,14 @@
             "args": ["watch"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug: Debugging Chunk",
+            "type": "go",
+            "request": "launch",
+            "program": "${workspaceFolder}/debug",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
         }
     ]
 }

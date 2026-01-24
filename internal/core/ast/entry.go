@@ -1,13 +1,13 @@
 package ast
 
 import (
+	"encoding/json"
 	"os"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/kwizyHQ/irex/internal/core/functions"
 	"github.com/kwizyHQ/irex/internal/diagnostics"
-	"github.com/kwizyHQ/irex/internal/utils"
 )
 
 func ParseHCL[T any](path string, def *T) diagnostics.Diagnostics {
@@ -29,5 +29,14 @@ func ParseToJson[T any](path string, def *T) (string, error) {
 	if len(err) > 0 {
 		return "", err
 	}
-	return utils.ToJSON(def)
+	return ToJSON(def)
+}
+
+// ToJSON converts any Go value to a pretty-printed JSON string
+func ToJSON(v any) (string, error) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }
