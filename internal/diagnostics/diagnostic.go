@@ -21,6 +21,7 @@ type Diagnostic struct {
 	Message  string   `json:"message"`
 	Source   string   `json:"source,omitempty"`
 	Code     string   `json:"code,omitempty"`
+	Filename string   `json:"filename,omitempty"`
 	HclPath  string   `json:"hcl_path,omitempty"`
 }
 
