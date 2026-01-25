@@ -4,10 +4,12 @@ go 1.25.1
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
+	github.com/bmatcuk/doublestar v1.3.4
 	github.com/dotenv-org/godotenvvault v0.6.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gobuffalo/flect v1.0.3
 	github.com/hashicorp/hcl/v2 v2.24.0
+	github.com/sourcegraph/jsonrpc2 v0.2.1
 	github.com/spf13/cobra v1.10.2
 	github.com/zclconf/go-cty v1.16.3
 	golang.org/x/term v0.32.0
@@ -24,7 +26,6 @@ require (
 	github.com/mattn/go-isatty v0.0.8 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/sourcegraph/jsonrpc2 v0.2.1 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/sync v0.14.0 // indirect

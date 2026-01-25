@@ -36,7 +36,7 @@ func (s *FlushRendersStep) Run(ctx *plan.PlanContext) error {
 		if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
 			return fmt.Errorf("failed to create directories for %s: %w", fullPath, err)
 		}
-		if err := os.WriteFile(fullPath, []byte(render.Content), 0644); err != nil {
+		if err := os.WriteFile(fullPath, []byte(render.Content), 0444); err != nil {
 			return fmt.Errorf("failed to write file %s: %w", fullPath, err)
 		}
 	}

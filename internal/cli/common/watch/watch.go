@@ -67,7 +67,8 @@ func Run() *cobra.Command {
 			mgr := watcher.NewManager(
 				[]string{
 					"irex.hcl",
-					"temp",
+					planCtx.IR.Config.Paths.Specifications + "/**/*",
+					planCtx.IR.Config.Paths.Templates + "/**/*",
 				},
 				300*time.Millisecond,
 				func(ctx context.Context, events []watcher.Event) error {

@@ -19,6 +19,9 @@ type CopyFilesStep struct {
 
 	// map[sourceFile]destinationFile (paths inside FS → relative to ctx.TargetDir)
 	FilesCopy map[string]string
+
+	// Optional ReadOnly flag (if true, copied files will have read-only permissions)
+	ReadOnly bool
 }
 
 func (c *CopyFilesStep) ID() string {
@@ -43,6 +46,7 @@ func (c *CopyFilesStep) Run(ctx *plan.PlanContext) error {
 		if err := c.copyDir(
 			srcDir,
 			filepath.Join(ctx.TargetDir, destDir),
+			c.ReadOnly,
 		); err != nil {
 			return err
 		}
@@ -54,6 +58,7 @@ func (c *CopyFilesStep) Run(ctx *plan.PlanContext) error {
 			c.FS,
 			srcFile,
 			filepath.Join(ctx.TargetDir, destFile),
+			c.ReadOnly,
 		); err != nil {
 			return err
 		}
@@ -66,7 +71,7 @@ func (c *CopyFilesStep) Run(ctx *plan.PlanContext) error {
 // ===== Internal helpers =====
 //
 
-func (c *CopyFilesStep) copyDir(srcDir, destRoot string) error {
+func (c *CopyFilesStep) copyDir(srcDir, destRoot string, readOnly bool) error {
 	return fs.WalkDir(c.FS, srcDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -83,11 +88,11 @@ func (c *CopyFilesStep) copyDir(srcDir, destRoot string) error {
 			return os.MkdirAll(destPath, 0755)
 		}
 
-		return copyFileFromFS(c.FS, path, destPath)
+		return copyFileFromFS(c.FS, path, destPath, readOnly)
 	})
 }
 
-func copyFileFromFS(srcFS fs.FS, srcPath, destPath string) error {
+func copyFileFromFS(srcFS fs.FS, srcPath, destPath string, readOnly bool) error {
 	in, err := srcFS.Open(srcPath)
 	if err != nil {
 		return err
@@ -95,7 +100,7 @@ func copyFileFromFS(srcFS fs.FS, srcPath, destPath string) error {
 	// fmt.Printf("srcPath: %s, destPath: %s\n", srcPath, destPath)
 	defer in.Close()
 
-	info, err := fs.Stat(srcFS, srcPath)
+	_, err = fs.Stat(srcFS, srcPath)
 	if err != nil {
 		return err
 	}
@@ -104,10 +109,15 @@ func copyFileFromFS(srcFS fs.FS, srcPath, destPath string) error {
 		return err
 	}
 
+	var permission os.FileMode = 0644
+	if readOnly {
+		permission = 0444
+	}
+
 	out, err := os.OpenFile(
 		destPath,
 		os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
-		info.Mode(),
+		permission,
 	)
 	if err != nil {
 		return err
