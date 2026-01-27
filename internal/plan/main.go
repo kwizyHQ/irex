@@ -49,6 +49,7 @@ type PlanContext struct {
 	CompiledTemplates CompiledTemplates
 	RenderSession     *RenderSession
 	TmpDir            *tempdir.TempDir
+	WatchRegistry     *WatchRegistry
 }
 
 type Plan struct {

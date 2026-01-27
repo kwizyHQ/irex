@@ -30,12 +30,12 @@ func FastifyTSWatchPlan(ctx *plan.PlanContext) *plan.Plan {
 		Steps: []plan.Step{
 			&steps.CompileTemplatesStep{
 				Fs:            fsub,
-				FrameworkType: plan.TemplateTypeSchema,
+				FrameworkType: plan.TemplateTypeService,
 				FrameworkName: "fastify",
 				// TemplateFuncs: TemplateFunctionsMap(),
 			},
 			&steps.RenderTemplatesStep{
-				TemplateType: plan.TemplateTypeSchema,
+				TemplateType: plan.TemplateTypeService,
 				Providers: []steps.DataProvider{
 					&AppDataProvider{},
 				},

@@ -29,6 +29,10 @@ func NodeTSWatchPlan(ctx *plan.PlanContext) *plan.Plan {
 			&steps.FlushRendersStep{
 				DestDir: ".",
 			},
+			&steps.WatchCommandStep{
+				IDValue: "npm-dev-node-ts",
+				Args:    []string{"npm", "run", "dev"},
+			},
 		},
 	}
 }

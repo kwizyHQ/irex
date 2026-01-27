@@ -3,7 +3,6 @@ package lsp
 import (
 	"context"
 	"encoding/json"
-	"log/slog"
 	"os"
 	"sync"
 
@@ -58,7 +57,7 @@ func (h *Handler) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2
 		os.Exit(0)
 	default:
 		// ignore notifications and unknown methods silently
-		slog.Debug("unknown method", "method", req.Method)
+		// slog.Debug("unknown method", "method", req.Method)
 	}
 }
 
