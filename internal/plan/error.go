@@ -1,6 +1,7 @@
 package plan
 
 import (
+	"log/slog"
 	"os"
 )
 
@@ -27,7 +28,7 @@ func (e *PlanError) Description() string {
 
 func (e *PlanError) Run(ctx *PlanContext) error {
 	// halt execution when this step is reached
-	println(e.Error())
+	slog.Error(e.Error())
 	os.Exit(1)
 	return nil
 }

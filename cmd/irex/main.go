@@ -1,10 +1,8 @@
 package main
 
 import (
-	"context"
 	"log/slog"
 	"os"
-	"time"
 
 	"github.com/dotenv-org/godotenvvault"
 	formatCmd "github.com/kwizyHQ/irex/internal/cli/common/format"
@@ -15,41 +13,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var startTime = time.Now()
-
-type elapsedHandler struct{ slog.Handler }
-
-func (h elapsedHandler) Handle(ctx context.Context, r slog.Record) error {
-	r.AddAttrs(
-		slog.String("elapsed", time.Since(startTime).Round(time.Millisecond).String()),
-	)
-	return h.Handler.Handle(ctx, r)
-}
-
 func main() {
-
 	err := godotenvvault.Load()
 	if err != nil {
 		// println("No env file found")
 	}
-	// set logger defaults
-	var level slog.Level
-	switch os.Getenv("IREX_LOG_LEVEL") {
-	case "DEBUG", "debug":
-		level = slog.LevelDebug
-	case "WARN", "warn":
-		level = slog.LevelWarn
-	case "ERROR", "error":
-		level = slog.LevelError
-	default:
-		level = slog.LevelInfo
-	}
-	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: level,
-	})
-	logger := slog.New(&elapsedHandler{Handler: handler})
-	// logger := slog.New(handler)
-	slog.SetDefault(logger)
+
+	// setup logging (moved to logging.go)
+	SetupLogging()
 
 	var rootCmd = &cobra.Command{
 		Use:   "irex",
