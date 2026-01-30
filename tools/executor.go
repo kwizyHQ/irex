@@ -8,6 +8,9 @@ import (
 func main() {
 	analyze := flag.Bool("a", false, "Run Analyze")
 	profile := flag.Bool("p", false, "Run Profile")
+	watcher := flag.Bool("w", false, "Run Watcher")
+	proxy := flag.String("x", "", "Run Proxy Command")
+
 	flag.Parse()
 
 	if *analyze {
@@ -16,7 +19,11 @@ func main() {
 	} else if *profile {
 		fmt.Println("Running Profile...")
 		Profile()
-	} else {
-		fmt.Println("No action specified. Use -a for analyze or -p for profile.")
+	} else if *watcher {
+		fmt.Println("Running Watcher...")
+		WatchAndBuild()
+	} else if *proxy != "" {
+		fmt.Println("Running Proxy Command...")
+		RunProxyCommand(*proxy, flag.Args())
 	}
 }
