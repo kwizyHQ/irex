@@ -61,6 +61,7 @@ func (s *RenderTemplatesStep) Run(ctx *plan.PlanContext) error {
 						slog.Debug("Rendering item for template: " + cT.Name)
 						rt, err := renderTemplate(bundle, cT, item)
 						if err != nil {
+							slog.Error("Error rendering template: "+cT.Name, "error", err)
 							return err
 						} else {
 							ctx.RenderSession.Files = append(ctx.RenderSession.Files, rt)

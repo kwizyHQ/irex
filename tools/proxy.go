@@ -22,6 +22,12 @@ func RunProxyCommand(command string, args []string) {
 		fmt.Println("Error getting run info (Check if watcher is running):", err)
 		return
 	}
+	// remove old log file at same path and create new one
+	err = os.RemoveAll(runInfo.LogFile)
+	if err != nil {
+		fmt.Println("Error removing log file", err)
+		return
+	}
 	err = ExecuteProxyCommand(command, args, runInfo.LogFile)
 	if err != nil {
 		fmt.Println("Error executing proxy command:", err)

@@ -38,6 +38,7 @@ func FastifyTSWatchPlan(ctx *plan.PlanContext) *plan.Plan {
 				TemplateType: plan.TemplateTypeService,
 				Providers: []steps.DataProvider{
 					&AppDataProvider{},
+					&RoutesDataProvider{},
 				},
 			},
 		},

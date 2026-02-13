@@ -26,6 +26,7 @@ type irexRunInfo struct {
 
 var (
 	runInfoPath = filepath.Join(os.TempDir(), "irex_run_info.json")
+	logFilePath = "irextools-log.log"
 )
 
 func saveRunFile(runInfo irexRunInfo) error {
@@ -48,7 +49,7 @@ func addRunInfoFile() {
 		Timestamp: time.Now().Format(time.RFC3339),
 		Stage:     StageInitial,
 		// use current working directory + irextools-log.log as log file
-		LogFile: filepath.Join(cwd, "irextools-log.log"),
+		LogFile: filepath.Join(cwd, logFilePath),
 	}
 	saveRunFile(runInfo)
 }
